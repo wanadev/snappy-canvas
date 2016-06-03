@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+
+<html>
+
+    <head>
+        <meta charset="UTF-8" />
+        <title>SnappyCanvas demo</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <style>
+            html, body {
+                margin: 0;
+                padding: 0;
+                background: #f1f1f1;
+                color: #333;
+                text-align: center;
+            }
+            canvas {
+                vertical-align: middle;
+                background: #fff;
+                margin: 30px;
+                border: #ccc solid 1px;
+            }
+        </style>
+    </head>
+
+    <body>
+        <script src="./dist/snappy-canvas.js"></script>
+        <script>
+            var canvas = new SnappyCanvas({
+                width: 800,
+                height: 600,
+                scale: 1
+            });
+            document.body.appendChild(canvas);
+        </script>
+    </body>
+
+</html>
