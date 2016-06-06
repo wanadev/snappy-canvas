@@ -215,7 +215,6 @@ var SnappyContext2D = function () {
             var _options = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
             var ctx = this._context2d;
-            var instructions = this._drawing;
 
             var options = {
                 translationX: 0,
@@ -246,7 +245,42 @@ var SnappyContext2D = function () {
             var pathBuff = [];
             var isStroke = 0;
 
-            // operations
+            // Helpers
+
+            function _drawStack(stack) {
+                var skipPath = arguments.length <= 1 || arguments[1] === undefined ? true : arguments[1];
+
+                for (var i = 0; i < stack.length; i++) {
+                    var operationName = stack[i][0];
+                    var operationDef = operationDefs[operationName];
+                    var operationFn = skipPath && operationDef && operationDef.isPath ? _operationPathStack : _operationGeneric;
+
+                    if (operationDef) {
+                        if (operationDef.fn) {
+                            operationFn = operationDefs[operationName].fn;
+                        }
+                    } else {
+                        operationFn = _operationUnimplemented;
+                    }
+
+                    operationFn.apply(undefined, [operationDef].concat(_toConsumableArray(stack[i])));
+                }
+            }
+
+            function _contextOperationCall(ctx, operationName) {
+                for (var _len2 = arguments.length, args = Array(_len2 > 2 ? _len2 - 2 : 0), _key2 = 2; _key2 < _len2; _key2++) {
+                    args[_key2 - 2] = arguments[_key2];
+                }
+
+                if (typeof ctx[operationName] == "function") {
+                    return ctx[operationName].apply(ctx, args);
+                } else {
+                    ctx[operationName] = args[0];
+                }
+            }
+
+            // Filters
+
             var _posx = function _posx(x, cs) {
                 return ((x + cs.translationX) * cs.scale | 0) + cs.lineWidth * isStroke % 2 / 2;
             };
@@ -260,48 +294,84 @@ var SnappyContext2D = function () {
                 return v;
             };
 
-            function _genericOperation(operation, instruction) {
-                if (operation.isStroke !== undefined) {
+            // Operations
+
+            function _operationGeneric(operation, operationName) {
+                if (operation.isStroke !== undefined && operation.isStroke !== null) {
                     isStroke = operation.isStroke;
                 }
-                var result = [];
+                var args = [];
 
-                for (var _len2 = arguments.length, values = Array(_len2 > 2 ? _len2 - 2 : 0), _key2 = 2; _key2 < _len2; _key2++) {
-                    values[_key2 - 2] = arguments[_key2];
+                for (var _len3 = arguments.length, values = Array(_len3 > 2 ? _len3 - 2 : 0), _key3 = 2; _key3 < _len3; _key3++) {
+                    values[_key3 - 2] = arguments[_key3];
                 }
 
                 for (var i = 0; i < values.length; i++) {
-                    result[i] = operation.args[i](values[i], canvasStatus);
+                    args[i] = operation.args[i](values[i], canvasStatus);
                 }
-                return result;
+                _contextOperationCall.apply(undefined, [ctx, operationName].concat(args));
             }
 
-            function _apply(ctx, instruction, args) {
-                if (typeof ctx[instruction] == "function") {
-                    return ctx[instruction].apply(ctx, args);
-                } else {
-                    ctx[instruction] = args[0];
+            function _operationPathStack(operation, operationName) {
+                for (var _len4 = arguments.length, values = Array(_len4 > 2 ? _len4 - 2 : 0), _key4 = 2; _key4 < _len4; _key4++) {
+                    values[_key4 - 2] = arguments[_key4];
                 }
+
+                pathBuff.push([operationName].concat(values));
             }
 
-            var operations = {
-                strokeRect: { isStroke: 1, args: [_posx, _posy, _size, _size], fn: _genericOperation },
-                fillRect: { isStroke: 0, args: [_posx, _posy, _size, _size], fn: _genericOperation }
+            function _operationUnimplemented(operation, operationName) {
+                console.warn("SnappyContext2D: the \"" + operationName + "\" operation is not implemented by SnappyCanvas. The output may be ugly!");
+                ctx.save();
+                ctx.translate(canvasStatus.translationX | 0, canvasStatus.translationY | 0);
+                ctx.scale(canvasStatus.scale, canvasStatus.scale);
+
+                for (var _len5 = arguments.length, values = Array(_len5 > 2 ? _len5 - 2 : 0), _key5 = 2; _key5 < _len5; _key5++) {
+                    values[_key5 - 2] = arguments[_key5];
+                }
+
+                _contextOperationCall.apply(undefined, [ctx, operationName].concat(values));
+                ctx.restore();
+            }
+
+            function _operationBeginPath(operation, operationName) {
+                pathBuff = [];
+            }
+
+            function _operationStroke(operation, operationName) {
+                isStroke = true;
+                ctx.beginPath();
+                _drawStack(pathBuff, false);
+                ctx.stroke();
+            }
+
+            function _operationFill(operation, operationName) {
+                isStroke = false;
+                ctx.beginPath();
+                _drawStack(pathBuff, false);
+                ctx.fill();
+            }
+
+            // Operations definition
+
+            var operationDefs = {
+                strokeRect: { isStroke: 1, args: [_posx, _posy, _size, _size] },
+                fillRect: { isStroke: 0, args: [_posx, _posy, _size, _size] },
+
+                beginPath: { fn: _operationBeginPath },
+                moveTo: { isPath: true, args: [_posx, _posy] },
+                lineTo: { isPath: true, args: [_posx, _posy] },
+                closePath: { isPath: true },
+
+                stroke: { fn: _operationStroke },
+                fill: { fn: _operationFill }
             };
+
+            // Let's draw
 
             ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
-            for (var i = 0; i < instructions.length; i++) {
-                var instruction = instructions[i][0];
-                if (operations[instruction]) {
-                    var _operations$instructi;
-
-                    var args = (_operations$instructi = operations[instruction]).fn.apply(_operations$instructi, [operations[instruction]].concat(_toConsumableArray(instructions[i])));
-                    _apply(ctx, instruction, args);
-                } else {
-                    throw new Error("NotImplementedError"); // FIXME
-                }
-            }
+            _drawStack(this._drawing);
         }
     }]);
 

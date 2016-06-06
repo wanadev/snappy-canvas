@@ -13,5 +13,7 @@
   "esnext": true,
   "loopfunc": true,
   "newcap": true,
-  "globals": {}
+  "globals": {
+    "console": true
+  }
 }

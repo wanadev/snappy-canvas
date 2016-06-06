@@ -50,7 +50,23 @@
             ctx.strokeRect(10, 10, 50, 50);
             ctx.fillRect(70, 10, 50, 50);
 
+            ctx.beginPath();
+            ctx.moveTo(130, 10);
+            ctx.lineTo(180, 10);
+            ctx.lineTo(180, 60);
+            ctx.lineTo(130, 60);
+            ctx.closePath();
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(190, 10);
+            ctx.lineTo(240, 10);
+            ctx.lineTo(240, 60);
+            ctx.lineTo(190, 60);
+            ctx.closePath();
+            ctx.fill();
             ctx.render();
+
         </script>
     </body>
 
