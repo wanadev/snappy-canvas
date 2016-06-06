@@ -370,7 +370,6 @@ var SnappyContext2D = function () {
             // Let's draw
 
             ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-
             _drawStack(this._drawing);
         }
     }]);
