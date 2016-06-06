@@ -24,7 +24,7 @@ SnappyCanvas.transformCanvas = function (canvas) {
     var _scale = options.scale !== undefined ? options.scale : 1;
     var _translationX = options.translationX !== undefined ? options.translationX : 0;
     var _translationY = options.translationY !== undefined ? options.translationY : 0;
-    var _scaleLineWidth = options.scaleLineWidth !== undefined ? options.scaleLineWidth : true;
+    var _scaleLineWidth = options.scaleLineWidth !== undefined ? options.scaleLineWidth : 1;
     var _resizeCanvas = options.resizeCanvas !== undefined ? options.resizeCanvas : false;
 
     if (options.uWidth) {
@@ -65,8 +65,10 @@ SnappyCanvas.transformCanvas = function (canvas) {
             var uWidth = this.uWidth;
             var uHeight = this.uHeight;
             _scale = scale;
-            this.width = uWidth * _scale | 0;
-            this.height = uHeight * _scale | 0;
+            if (_resizeCanvas) {
+                this.width = uWidth * _scale | 0;
+                this.height = uHeight * _scale | 0;
+            }
             this.render();
         }
     });
