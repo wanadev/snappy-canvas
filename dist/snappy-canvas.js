@@ -299,10 +299,10 @@ var SnappyContext2D = function () {
                 closePath: { isPath: true },
                 moveTo: { isPath: true, args: [_posx, _posy] },
                 lineTo: { isPath: true, args: [_posx, _posy] },
-                // TODO bezierCurveTo()
-                // TODO quadraticCurveTo()
-                // TODO arc()
-                // TODO arcTo()
+                bezierCurveTo: { isPath: true, args: [_posx, _posy, _posx, _posy, _posx, _posy] },
+                quadraticCurveTo: { isPath: true, args: [_posx, _posy, _posx, _posy] },
+                arc: { isPath: true, args: [_posx, _posy, _size, _nop, _nop, _nop] },
+                arcTo: { isPath: true, args: [_posx, _posy, _posx, _posy, _size] },
                 // TODO ellipse()   /!\ Experimental
                 rect: { args: [_posx, _posy, _size, _size] },
 

@@ -34,7 +34,7 @@
                 globalTranslationX: 0,
                 globalTranslationY: 0,
                 scaleLineWidth: false,
-                autoResizeCanvas: true
+                autoResizeCanvas: false
             });
 
             document.body.appendChild(canvas);
@@ -68,6 +68,27 @@
 
             ctx.lineWidth = 4;
             ctx.strokeRect(10, 70, 50, 50);
+
+            ctx.lineWidth = 2;
+
+            ctx.beginPath();
+            ctx.moveTo(70, 95);
+            ctx.bezierCurveTo(70, 95, 110, 72, 140, 110);
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(150, 95);
+            ctx.quadraticCurveTo(180, 72, 210, 110);
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.arc(35, 155, 25, Math.PI, 2.5 * Math.PI);
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(70, 155);
+            ctx.arcTo(120, 155, 120, 160, 25);
+            ctx.stroke();
 
             ctx.render();
 
