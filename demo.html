@@ -44,6 +44,9 @@
             ctx.strokeRect(10, 10, 50, 50);
             ctx.fillRect(70, 10, 50, 50);
 
+            ctx.strokeStyle = "blue";
+            ctx.fillStyle = "red";
+
             ctx.beginPath();
             ctx.moveTo(130, 10);
             ctx.lineTo(180, 10);
@@ -59,8 +62,14 @@
             ctx.lineTo(190, 60);
             ctx.closePath();
             ctx.fill();
-            ctx.render();
 
+            ctx.strokeStyle = "black";
+            ctx.fillStyle = "black";
+
+            ctx.lineWidth = 4;
+            ctx.strokeRect(10, 70, 50, 50);
+
+            ctx.render();
 
             // Additional code for live translation & scaling
             var _prevX;

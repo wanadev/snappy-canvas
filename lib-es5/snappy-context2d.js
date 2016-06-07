@@ -22,6 +22,11 @@ var SnappyContext2D = function () {
             configurable: false,
             value: []
         });
+        Object.defineProperty(this, "canvas", {
+            enumerable: true,
+            configurable: false,
+            value: this._context2d.canvas
+        });
 
         function _context2dMethod() {
             for (var _len = arguments.length, call = Array(_len), _key = 0; _key < _len; _key++) {
@@ -32,13 +37,29 @@ var SnappyContext2D = function () {
         }
 
         for (var prop in context2d) {
+            if (this[prop] !== undefined) {
+                continue;
+            }
             if (typeof context2d[prop] == "function") {
                 this[prop] = _context2dMethod.bind(this, prop);
+            } else {
+                Object.defineProperty(this, prop, {
+                    enumerable: true,
+                    configurable: false,
+                    get: function get() {},
+                    set: _context2dMethod.bind(this, prop)
+                });
             }
         }
     }
 
     _createClass(SnappyContext2D, [{
+        key: "clear",
+        value: function clear() {
+            this._drawing.length = 0;
+            this.render();
+        }
+    }, {
         key: "render",
         value: function render() {
             var _options = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
@@ -71,7 +92,7 @@ var SnappyContext2D = function () {
             ctx.lineWidth = canvasStatus.lineWidth;
 
             var canvasStatusStack = [];
-            var pathBuff = [];
+            var pathStack = [];
             var isStroke = 0;
 
             // Helpers
@@ -110,16 +131,16 @@ var SnappyContext2D = function () {
 
             // Filters
 
-            var _posx = function _posx(x, cs) {
+            var _posx = function _posx(x, cs, opt) {
                 return ((x + cs.translationX) * cs.scale | 0) + cs.lineWidth * isStroke % 2 / 2;
             };
-            var _posy = function _posy(y, cs) {
+            var _posy = function _posy(y, cs, opt) {
                 return ((y + cs.translationY) * cs.scale | 0) + cs.lineWidth * isStroke % 2 / 2;
             };
-            var _size = function _size(s, cs) {
+            var _size = function _size(s, cs, opt) {
                 return s * cs.scale | 0;
             };
-            var _nop = function _nop(v, cs) {
+            var _nop = function _nop(v, cs, opt) {
                 return v;
             };
 
@@ -136,7 +157,7 @@ var SnappyContext2D = function () {
                 }
 
                 for (var i = 0; i < values.length; i++) {
-                    args[i] = operation.args[i](values[i], canvasStatus);
+                    args[i] = operation.args[i](values[i], canvasStatus, options);
                 }
                 _contextOperationCall.apply(undefined, [ctx, operationName].concat(args));
             }
@@ -146,7 +167,7 @@ var SnappyContext2D = function () {
                     values[_key4 - 2] = arguments[_key4];
                 }
 
-                pathBuff.push([operationName].concat(values));
+                pathStack.push([operationName].concat(values));
             }
 
             function _operationUnimplemented(operation, operationName) {
@@ -164,43 +185,143 @@ var SnappyContext2D = function () {
             }
 
             function _operationBeginPath(operation, operationName) {
-                pathBuff = [];
+                pathStack = [];
             }
 
             function _operationStroke(operation, operationName) {
                 isStroke = true;
                 ctx.beginPath();
-                _drawStack(pathBuff, false);
+                _drawStack(pathStack, false);
                 ctx.stroke();
             }
 
             function _operationFill(operation, operationName) {
                 isStroke = false;
                 ctx.beginPath();
-                _drawStack(pathBuff, false);
+                _drawStack(pathStack, false);
                 ctx.fill();
+            }
+
+            function _operationLineWidth(operation, operationName) {
+                var lineWidth;
+                if (options.scaleLineWidth) {
+                    lineWidth = (arguments.length <= 2 ? undefined : arguments[2]) * canvasStatus.scale | 0;
+                } else {
+                    lineWidth = (arguments.length <= 2 ? undefined : arguments[2]) | 0;
+                }
+                canvasStatus.lineWidth = lineWidth;
+                ctx.lineWidth = lineWidth;
             }
 
             // Operations definition
 
             var operationDefs = {
-                strokeRect: { isStroke: 1, args: [_posx, _posy, _size, _size] },
-                fillRect: { isStroke: 0, args: [_posx, _posy, _size, _size] },
 
+                // Drawing rectangles
+                // TODO clearRect()
+                fillRect: { isStroke: 0, args: [_posx, _posy, _size, _size] },
+                strokeRect: { isStroke: 1, args: [_posx, _posy, _size, _size] },
+
+                // Drawing text
+                // TODO fillText()
+                // TODO strokeText()
+                // TODO measureText()
+
+                // Line style
+                lineWidth: { fn: _operationLineWidth },
+                // TODO lineCap
+                // TODO lineJoin
+                // TODO miterLimit
+                // TODO getLineDash()
+                // TODO setLineDash()
+                // TODO lineDashOffset
+
+                // Text styles
+                // TODO font
+                // TODO textAlign
+                // TODO textBaseline
+                // TODO direction
+
+                // Fill and stroke styles
+                fillStyle: { args: [_nop] },
+                strokeStyle: { args: [_nop] },
+
+                // Gradients and patterns
+                // TODO createLinearGradient()
+                // TODO createRadialGradient()
+                // TODO createPattern()
+
+                // Shadows
+                // TODO shadowBlur
+                // TODO shadowColor
+                // TODO shadowOffsetX
+                // TODO shadowOffsetY
+
+                // Path
                 beginPath: { fn: _operationBeginPath },
+                closePath: { isPath: true },
                 moveTo: { isPath: true, args: [_posx, _posy] },
                 lineTo: { isPath: true, args: [_posx, _posy] },
-                closePath: { isPath: true },
+                // TODO bezierCurveTo()
+                // TODO quadraticCurveTo()
+                // TODO arc()
+                // TODO arcTo()
+                // TODO ellipse()   /!\ Experimental
+                rect: { args: [_posx, _posy, _size, _size] },
 
+                // Drawing paths
+                fill: { fn: _operationFill },
                 stroke: { fn: _operationStroke },
-                fill: { fn: _operationFill }
+                // TODO drawFocusIfNeeded()
+                // TODO scrollPathIntoView()    /!\ Experimental
+                // TODO clip()
+                // TODO isPointInPath()
+                // TODO isPointInStroke()
+
+                // Transformation
+                // TODO currentTransform per every
+                // TODO rotate()
+                // TODO scale()
+                // TODO translate()
+                // TODO transform()
+                // TODO resetTransform()    /!\ Experimental
+
+                // Compositing
+                // TODO globalAlpha
+                // TODO globalCompositeOperation
+
+                // Drawing images
+                // TODO drawImage
+
+                // Pixel manipulation
+                // TODO createImageData()
+                // TODO getImageData()
+                // TODO putImageData()
+
+                // Image smoothing
+                // TODO imageSmoothingEnabled       /!\ Experimental
+
+                // The canvas state
+                save: { fn: function fn(_) {
+                        return console.error("SnappyContext2D: the 'save' operation is not implemented yet!");
+                    } },
+                restore: { fn: function fn(_) {
+                        return console.error("SnappyContext2D: the 'restore' operation is not implemented yet!");
+                    } }
+
             };
 
             // Let's draw
 
-            ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+            // Hit regions
+            // TODO addHitRegion()        /!\ Experimental
+            // TODO removeHitRegion()     /!\ Experimental
+            // TODO clearHitRegion()      /!\ Experimental
 
+            ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+            ctx.save();
             _drawStack(this._drawing);
+            ctx.restore();
         }
     }]);
 
