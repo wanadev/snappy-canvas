@@ -29,127 +29,46 @@ var SnappyCanvas = function SnappyCanvas(options) {
 
     var canvas = options.canvas || document.createElement("canvas");
     SnappyCanvas.transformCanvas(canvas, options);
-    if (options.width !== undefined) {
-        canvas.width = options.width;
-    }
-    if (options.height !== undefined) {
-        canvas.height = options.height;
-    }
     return canvas;
 };
 
 SnappyCanvas.transformCanvas = function (canvas) {
     var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
 
-    var _scale = options.scale !== undefined ? options.scale : 1;
-    var _translationX = options.translationX !== undefined ? options.translationX : 0;
-    var _translationY = options.translationY !== undefined ? options.translationY : 0;
-    var _scaleLineWidth = options.scaleLineWidth !== undefined ? options.scaleLineWidth : 1;
-    var _resizeCanvas = options.resizeCanvas !== undefined ? options.resizeCanvas : false;
+    var context2d = canvas.getContext("2d");
+    var snappyContext2d = new SnappyContext2D(context2d, options);
+
+    canvas.getContext = function (contextType) {
+        if (contextType == "snappy") {
+            return snappyContext2d;
+        } else {
+            return HTMLCanvasElement.prototype.getContext.call(this, contextType);
+        }
+    };
+
+    if (options.width) {
+        canvas.width = options.width;
+    }
+    if (options.height) {
+        canvas.height = options.height;
+    }
 
     if (options.uWidth) {
-        canvas.width = options.uWidth * _scale | 0;
+        canvas.uWidth = options.uWidth;
     }
 
     if (options.uHeight) {
-        canvas.height = options.uHeight * _scale | 0;
+        canvas.uHeight = options.uHeight;
     }
-
-    canvas._rawContext2d = canvas.getContext("2d");
-    canvas._snappyContext2d = new SnappyContext2D(canvas._rawContext2d);
-
-    canvas.getContext = function (contextType) {
-        if (contextType != "2d") {
-            throw new Error("ValueError: SnappyCanvas only supports '2d' context type.");
-        }
-        return this._snappyContext2d;
-    };
-
-    canvas.translate = function (tx, ty) {
-        _translationX = tx;
-        _translationY = ty;
-        this.render();
-    };
-
-    canvas.render = function () {
-        this._snappyContext2d.render();
-    };
-
-    Object.defineProperty(canvas, "scale", {
-        enumerable: true,
-        configurable: false,
-        get: function get() {
-            return _scale;
-        },
-        set: function set(scale) {
-            var uWidth = this.uWidth;
-            var uHeight = this.uHeight;
-            _scale = scale;
-            if (_resizeCanvas) {
-                this.width = uWidth * _scale | 0;
-                this.height = uHeight * _scale | 0;
-            }
-            this.render();
-        }
-    });
-
-    Object.defineProperty(canvas, "translationX", {
-        enumerable: true,
-        configurable: false,
-        get: function get() {
-            return _translationX;
-        },
-        set: function set(tx) {
-            _translationX = tx;
-            this.render();
-        }
-    });
-
-    Object.defineProperty(canvas, "translationY", {
-        enumerable: true,
-        configurable: false,
-        get: function get() {
-            return _translationY;
-        },
-        set: function set(ty) {
-            _translationY = ty;
-            this.render();
-        }
-    });
-
-    Object.defineProperty(canvas, "scaleLineWidth", {
-        enumerable: true,
-        configurable: false,
-        get: function get() {
-            return _scaleLineWidth;
-        },
-        set: function set(scaleLineWidth) {
-            _scaleLineWidth = scaleLineWidth;
-            this.render();
-        }
-    });
-
-    Object.defineProperty(canvas, "resizeCanvas", {
-        enumerable: true,
-        configurable: false,
-        get: function get() {
-            return _resizeCanvas;
-        },
-        set: function set(resizeCanvas) {
-            _resizeCanvas = resizeCanvas;
-            this.render();
-        }
-    });
 
     Object.defineProperty(canvas, "uWidth", {
         enumerable: true,
         configurable: false,
         get: function get() {
-            return this.width / _scale | 0;
+            return this.width / snappyContext2d.globalScale | 0;
         },
         set: function set(uWidth) {
-            this.width = uWidth * _scale | 0;
-            this.render();
+            this.width = uWidth * snappyContext2d.globalScale | 0;
         }
     });
 
@@ -157,11 +76,10 @@ SnappyCanvas.transformCanvas = function (canvas) {
         enumerable: true,
         configurable: false,
         get: function get() {
-            return this.height / _scale | 0;
+            return this.height / snappyContext2d.globalScale | 0;
         },
         set: function set(uHeight) {
-            this.height = uHeight * _scale | 0;
-            this.render();
+            this.height = uHeight * snappyContext2d.globalScale | 0;
         }
     });
 };
@@ -181,6 +99,8 @@ var helpers = require("./helpers.js");
 
 var SnappyContext2D = function () {
     function SnappyContext2D(context2d) {
+        var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+
         _classCallCheck(this, SnappyContext2D);
 
         Object.defineProperty(this, "_context2d", {
@@ -193,10 +113,16 @@ var SnappyContext2D = function () {
             configurable: false,
             value: []
         });
-        Object.defineProperty(this, "canvas", {
-            enumerable: true,
+        Object.defineProperty(this, "_options", {
+            enumerable: false,
             configurable: false,
-            value: this._context2d.canvas
+            value: helpers.merge({
+                globalTranslationX: 0,
+                globalTranslationY: 0,
+                globalScale: 1,
+                scaleLineWidth: true,
+                autoResizeCanvas: false
+            }, options)
         });
 
         function _context2dMethod() {
@@ -233,60 +159,20 @@ var SnappyContext2D = function () {
     }, {
         key: "render",
         value: function render() {
-            var _options = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
-
             var ctx = this._context2d;
+            var options = this._options;
 
-            var options = {
-                translationX: 0,
-                translationY: 0,
-                scale: 1,
-                scaleLineWidth: 1
-            };
-
-            if (ctx.canvas._snappyContext2d === this) {
-                options.translationX = ctx.canvas.translationX;
-                options.translationY = ctx.canvas.translationY;
-                options.scale = ctx.canvas.scale;
-                options.scaleLineWidth = ctx.canvas.scaleLineWidth;
-            }
-
-            helpers.merge(options, _options);
-
-            var canvasStatus = {
-                translationX: options.translationX,
-                translationY: options.translationY,
-                scale: options.scale,
-                lineWidth: options.scaleLineWidth ? Math.max(1, options.scale | 0) : 1
-            };
-
-            ctx.lineWidth = canvasStatus.lineWidth;
-
-            var canvasStatusStack = [];
             var pathStack = [];
             var isStroke = 0;
 
+            var canvasStatus = {
+                tx: options.globalTranslationX,
+                ty: options.globalTranslationY,
+                scale: options.globalScale,
+                lw: options.scaleLineWidth ? Math.max(1, options.globalScale | 0) : 1
+            };
+
             // Helpers
-
-            function _drawStack(stack) {
-                var skipPath = arguments.length <= 1 || arguments[1] === undefined ? true : arguments[1];
-
-                for (var i = 0; i < stack.length; i++) {
-                    var operationName = stack[i][0];
-                    var operationDef = operationDefs[operationName];
-                    var operationFn = skipPath && operationDef && operationDef.isPath ? _operationPathStack : _operationGeneric;
-
-                    if (operationDef) {
-                        if (operationDef.fn) {
-                            operationFn = operationDefs[operationName].fn;
-                        }
-                    } else {
-                        operationFn = _operationUnimplemented;
-                    }
-
-                    operationFn.apply(undefined, [operationDef].concat(_toConsumableArray(stack[i])));
-                }
-            }
 
             function _contextOperationCall(ctx, operationName) {
                 for (var _len2 = arguments.length, args = Array(_len2 > 2 ? _len2 - 2 : 0), _key2 = 2; _key2 < _len2; _key2++) {
@@ -303,10 +189,10 @@ var SnappyContext2D = function () {
             // Filters
 
             var _posx = function _posx(x, cs, opt) {
-                return ((x + cs.translationX) * cs.scale | 0) + cs.lineWidth * isStroke % 2 / 2;
+                return ((x + cs.tx) * cs.scale | 0) + cs.lw * isStroke % 2 / 2;
             };
             var _posy = function _posy(y, cs, opt) {
-                return ((y + cs.translationY) * cs.scale | 0) + cs.lineWidth * isStroke % 2 / 2;
+                return ((y + cs.ty) * cs.scale | 0) + cs.lw * isStroke % 2 / 2;
             };
             var _size = function _size(s, cs, opt) {
                 return s * cs.scale | 0;
@@ -344,7 +230,7 @@ var SnappyContext2D = function () {
             function _operationUnimplemented(operation, operationName) {
                 console.warn("SnappyContext2D: the \"" + operationName + "\" operation is not implemented by SnappyCanvas. The output may be ugly!");
                 ctx.save();
-                ctx.translate(canvasStatus.translationX | 0, canvasStatus.translationY | 0);
+                ctx.translate(canvasStatus.tx | 0, canvasStatus.ty | 0);
                 ctx.scale(canvasStatus.scale, canvasStatus.scale);
 
                 for (var _len5 = arguments.length, values = Array(_len5 > 2 ? _len5 - 2 : 0), _key5 = 2; _key5 < _len5; _key5++) {
@@ -355,38 +241,7 @@ var SnappyContext2D = function () {
                 ctx.restore();
             }
 
-            function _operationBeginPath(operation, operationName) {
-                pathStack = [];
-            }
-
-            function _operationStroke(operation, operationName) {
-                isStroke = true;
-                ctx.beginPath();
-                _drawStack(pathStack, false);
-                ctx.stroke();
-            }
-
-            function _operationFill(operation, operationName) {
-                isStroke = false;
-                ctx.beginPath();
-                _drawStack(pathStack, false);
-                ctx.fill();
-            }
-
-            function _operationLineWidth(operation, operationName) {
-                var lineWidth;
-                if (options.scaleLineWidth) {
-                    lineWidth = (arguments.length <= 2 ? undefined : arguments[2]) * canvasStatus.scale | 0;
-                } else {
-                    lineWidth = (arguments.length <= 2 ? undefined : arguments[2]) | 0;
-                }
-                canvasStatus.lineWidth = lineWidth;
-                ctx.lineWidth = lineWidth;
-            }
-
-            // Operations definition
-
-            var operationDefs = {
+            var operations = {
 
                 // Drawing rectangles
                 // TODO clearRect()
@@ -399,7 +254,16 @@ var SnappyContext2D = function () {
                 // TODO measureText()
 
                 // Line style
-                lineWidth: { fn: _operationLineWidth },
+                lineWidth: { fn: function fn(operation, operationName) {
+                        var lineWidth;
+                        if (options.scaleLineWidth) {
+                            lineWidth = (arguments.length <= 2 ? undefined : arguments[2]) * canvasStatus.scale | 0;
+                        } else {
+                            lineWidth = (arguments.length <= 2 ? undefined : arguments[2]) | 0;
+                        }
+                        canvasStatus.lw = lineWidth;
+                        ctx.lineWidth = lineWidth;
+                    } },
                 // TODO lineCap
                 // TODO lineJoin
                 // TODO miterLimit
@@ -429,7 +293,9 @@ var SnappyContext2D = function () {
                 // TODO shadowOffsetY
 
                 // Path
-                beginPath: { fn: _operationBeginPath },
+                beginPath: { fn: function fn(_) {
+                        return pathStack = [];
+                    } },
                 closePath: { isPath: true },
                 moveTo: { isPath: true, args: [_posx, _posy] },
                 lineTo: { isPath: true, args: [_posx, _posy] },
@@ -441,8 +307,12 @@ var SnappyContext2D = function () {
                 rect: { args: [_posx, _posy, _size, _size] },
 
                 // Drawing paths
-                fill: { fn: _operationFill },
-                stroke: { fn: _operationStroke },
+                fill: { fn: function fn(_) {
+                        isStroke = false;_drawStack(pathStack, false);ctx.fill();
+                    } },
+                stroke: { fn: function fn(_) {
+                        isStroke = true;_drawStack(pathStack, false);ctx.stroke();
+                    } },
                 // TODO drawFocusIfNeeded()
                 // TODO scrollPathIntoView()    /!\ Experimental
                 // TODO clip()
@@ -475,24 +345,88 @@ var SnappyContext2D = function () {
                 // The canvas state
                 save: { fn: function fn(_) {
                         return console.error("SnappyContext2D: the 'save' operation is not implemented yet!");
-                    } },
+                    } }, // FIXME
                 restore: { fn: function fn(_) {
                         return console.error("SnappyContext2D: the 'restore' operation is not implemented yet!");
-                    } }
+                    } } };
 
-            };
+            // Let it draw! Let it draw!
 
-            // Let's draw
+            //FIXME
 
             // Hit regions
             // TODO addHitRegion()        /!\ Experimental
             // TODO removeHitRegion()     /!\ Experimental
             // TODO clearHitRegion()      /!\ Experimental
 
-            ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+            function _drawStack(stack) {
+                var skipPathOperations = arguments.length <= 1 || arguments[1] === undefined ? true : arguments[1];
+
+                ctx.beginPath();
+
+                for (var i = 0; i < stack.length; i++) {
+                    var operationName = stack[i][0];
+                    var operation = operations[operationName];
+                    var operationFn = skipPathOperations && operation && operation.isPath ? _operationPathStack : _operationGeneric;
+
+                    if (operation && operation.fn) {
+                        operationFn = operation.fn;
+                    } else if (!operation) {
+                        operationFn = _operationUnimplemented;
+                    }
+
+                    operationFn.apply(undefined, [operation].concat(_toConsumableArray(stack[i])));
+                }
+            }
+
             ctx.save();
+            ctx.lineWidth = canvasStatus.lw;
+            ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
             _drawStack(this._drawing);
             ctx.restore();
+        }
+    }, {
+        key: "canvas",
+        get: function get() {
+            return this._context2d.canvas;
+        }
+    }, {
+        key: "globalTranslationX",
+        get: function get() {
+            return this._options.globalTranslationX;
+        },
+        set: function set(tx) {
+            this._options.globalTranslationX = tx;
+        }
+    }, {
+        key: "globalTranslationY",
+        get: function get() {
+            return this._options.globalTranslationY;
+        },
+        set: function set(ty) {
+            this._options.globalTranslationY = ty;
+        }
+    }, {
+        key: "globalScale",
+        get: function get() {
+            return this._options.globalScale;
+        },
+        set: function set(scale) {
+            var uWidth = this._context2d.canvas.uWidth;
+            var uHeight = this._context2d.canvas.uHeight;
+            this._options.globalScale = scale;
+            if (uWidth !== undefined && uHeight !== undefined && this._options.autoResizeCanvas) {
+                this._context2d.canvas.uWidth = uWidth;
+                this._context2d.canvas.uHeight = uHeight;
+            }
+        }
+    }, {
+        key: "scaleLineWidth",
+        get: function get() {
+            return this._options.scaleLineWidth;
+        },
+        set: function set(scaleLineWidth) {
+            this._options.scaleLineWidth = scaleLineWidth;
         }
     }]);
 

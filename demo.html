@@ -30,16 +30,16 @@
             var canvas = new SnappyCanvas({
                 width: 800,
                 height: 600,
-                scale: 1,
-                translationX: 0,
-                translationY: 0,
-                scaleLineWidth: 0,
-                resizeCanvas: 0
+                globalScale: 1,
+                globalTranslationX: 0,
+                globalTranslationY: 0,
+                scaleLineWidth: false,
+                autoResizeCanvas: true
             });
 
             document.body.appendChild(canvas);
 
-            var ctx = canvas.getContext("2d");
+            var ctx = canvas.getContext("snappy");
 
             ctx.strokeRect(10, 10, 50, 50);
             ctx.fillRect(70, 10, 50, 50);
@@ -78,10 +78,11 @@
 
             canvas.onwheel = function(event) {
                 if (event.deltaY <= 0) {
-                    canvas.scale += 0.1;
+                    ctx.globalScale += 0.1;
                 } else {
-                    canvas.scale -= 0.1;
+                    ctx.globalScale -= 0.1;
                 }
+                ctx.render();
             };
 
             canvas.onmousedown = function() {
@@ -96,8 +97,9 @@
                 if (_isDragging) {
                     var deltaX = event.pageX - _prevX;
                     var deltaY = event.pageY - _prevY;
-                    canvas.translationX += deltaX / canvas.scale;
-                    canvas.translationY += deltaY / canvas.scale;
+                    ctx.globalTranslationX += deltaX / ctx.globalScale;
+                    ctx.globalTranslationY += deltaY / ctx.globalScale;
+                    ctx.render();
                 }
                 _prevX = event.pageX;
                 _prevY = event.pageY;

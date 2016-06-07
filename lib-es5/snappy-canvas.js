@@ -9,127 +9,46 @@ var SnappyCanvas = function SnappyCanvas(options) {
 
     var canvas = options.canvas || document.createElement("canvas");
     SnappyCanvas.transformCanvas(canvas, options);
-    if (options.width !== undefined) {
-        canvas.width = options.width;
-    }
-    if (options.height !== undefined) {
-        canvas.height = options.height;
-    }
     return canvas;
 };
 
 SnappyCanvas.transformCanvas = function (canvas) {
     var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
 
-    var _scale = options.scale !== undefined ? options.scale : 1;
-    var _translationX = options.translationX !== undefined ? options.translationX : 0;
-    var _translationY = options.translationY !== undefined ? options.translationY : 0;
-    var _scaleLineWidth = options.scaleLineWidth !== undefined ? options.scaleLineWidth : 1;
-    var _resizeCanvas = options.resizeCanvas !== undefined ? options.resizeCanvas : false;
+    var context2d = canvas.getContext("2d");
+    var snappyContext2d = new SnappyContext2D(context2d, options);
+
+    canvas.getContext = function (contextType) {
+        if (contextType == "snappy") {
+            return snappyContext2d;
+        } else {
+            return HTMLCanvasElement.prototype.getContext.call(this, contextType);
+        }
+    };
+
+    if (options.width) {
+        canvas.width = options.width;
+    }
+    if (options.height) {
+        canvas.height = options.height;
+    }
 
     if (options.uWidth) {
-        canvas.width = options.uWidth * _scale | 0;
+        canvas.uWidth = options.uWidth;
     }
 
     if (options.uHeight) {
-        canvas.height = options.uHeight * _scale | 0;
+        canvas.uHeight = options.uHeight;
     }
-
-    canvas._rawContext2d = canvas.getContext("2d");
-    canvas._snappyContext2d = new SnappyContext2D(canvas._rawContext2d);
-
-    canvas.getContext = function (contextType) {
-        if (contextType != "2d") {
-            throw new Error("ValueError: SnappyCanvas only supports '2d' context type.");
-        }
-        return this._snappyContext2d;
-    };
-
-    canvas.translate = function (tx, ty) {
-        _translationX = tx;
-        _translationY = ty;
-        this.render();
-    };
-
-    canvas.render = function () {
-        this._snappyContext2d.render();
-    };
-
-    Object.defineProperty(canvas, "scale", {
-        enumerable: true,
-        configurable: false,
-        get: function get() {
-            return _scale;
-        },
-        set: function set(scale) {
-            var uWidth = this.uWidth;
-            var uHeight = this.uHeight;
-            _scale = scale;
-            if (_resizeCanvas) {
-                this.width = uWidth * _scale | 0;
-                this.height = uHeight * _scale | 0;
-            }
-            this.render();
-        }
-    });
-
-    Object.defineProperty(canvas, "translationX", {
-        enumerable: true,
-        configurable: false,
-        get: function get() {
-            return _translationX;
-        },
-        set: function set(tx) {
-            _translationX = tx;
-            this.render();
-        }
-    });
-
-    Object.defineProperty(canvas, "translationY", {
-        enumerable: true,
-        configurable: false,
-        get: function get() {
-            return _translationY;
-        },
-        set: function set(ty) {
-            _translationY = ty;
-            this.render();
-        }
-    });
-
-    Object.defineProperty(canvas, "scaleLineWidth", {
-        enumerable: true,
-        configurable: false,
-        get: function get() {
-            return _scaleLineWidth;
-        },
-        set: function set(scaleLineWidth) {
-            _scaleLineWidth = scaleLineWidth;
-            this.render();
-        }
-    });
-
-    Object.defineProperty(canvas, "resizeCanvas", {
-        enumerable: true,
-        configurable: false,
-        get: function get() {
-            return _resizeCanvas;
-        },
-        set: function set(resizeCanvas) {
-            _resizeCanvas = resizeCanvas;
-            this.render();
-        }
-    });
 
     Object.defineProperty(canvas, "uWidth", {
         enumerable: true,
         configurable: false,
         get: function get() {
-            return this.width / _scale | 0;
+            return this.width / snappyContext2d.globalScale | 0;
         },
         set: function set(uWidth) {
-            this.width = uWidth * _scale | 0;
-            this.render();
+            this.width = uWidth * snappyContext2d.globalScale | 0;
         }
     });
 
@@ -137,11 +56,10 @@ SnappyCanvas.transformCanvas = function (canvas) {
         enumerable: true,
         configurable: false,
         get: function get() {
-            return this.height / _scale | 0;
+            return this.height / snappyContext2d.globalScale | 0;
         },
         set: function set(uHeight) {
-            this.height = uHeight * _scale | 0;
-            this.render();
+            this.height = uHeight * snappyContext2d.globalScale | 0;
         }
     });
 };
