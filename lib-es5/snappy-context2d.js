@@ -62,10 +62,16 @@ var SnappyContext2D = function () {
     }
 
     _createClass(SnappyContext2D, [{
+        key: "setSnappyOptions",
+        value: function setSnappyOptions(options) {
+            helpers.merge(this._options, options);
+            this.render();
+        }
+    }, {
         key: "clear",
         value: function clear() {
             this._drawing.length = 0;
-            this.render();
+            this._context2d.clearRect(0, 0, this._context2d.canvas.width, this._context2d.canvas.height);
         }
     }, {
         key: "render",
@@ -308,6 +314,7 @@ var SnappyContext2D = function () {
         },
         set: function set(tx) {
             this._options.globalTranslationX = tx;
+            this.render();
         }
     }, {
         key: "globalTranslationY",
@@ -316,6 +323,7 @@ var SnappyContext2D = function () {
         },
         set: function set(ty) {
             this._options.globalTranslationY = ty;
+            this.render();
         }
     }, {
         key: "globalScale",
@@ -330,6 +338,7 @@ var SnappyContext2D = function () {
                 this._context2d.canvas.contentWidth = contentWidth;
                 this._context2d.canvas.contentHeight = contentHeight;
             }
+            this.render();
         }
     }, {
         key: "scaleLineWidth",
@@ -338,6 +347,7 @@ var SnappyContext2D = function () {
         },
         set: function set(scaleLineWidth) {
             this._options.scaleLineWidth = scaleLineWidth;
+            this.render();
         }
     }]);
 

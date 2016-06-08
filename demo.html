@@ -105,7 +105,6 @@
                 } else {
                     ctx.globalScale /= 1.1;
                 }
-                ctx.render();
             };
 
             canvas.onmousedown = function() {
@@ -122,7 +121,6 @@
                     var deltaY = event.pageY - _prevY;
                     ctx.globalTranslationX += deltaX / ctx.globalScale;
                     ctx.globalTranslationY += deltaY / ctx.globalScale;
-                    ctx.render();
                 }
                 _prevX = event.pageX;
                 _prevY = event.pageY;
