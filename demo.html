@@ -30,6 +30,8 @@
             var canvas = new SnappyCanvas({
                 width: 800,
                 height: 600,
+                contentWidth: 800,
+                contentHeight: 600,
                 globalScale: 1,
                 globalTranslationX: 0,
                 globalTranslationY: 0,
@@ -99,9 +101,9 @@
 
             canvas.onwheel = function(event) {
                 if (event.deltaY <= 0) {
-                    ctx.globalScale += 0.1;
+                    ctx.globalScale *= 1.1;
                 } else {
-                    ctx.globalScale -= 0.1;
+                    ctx.globalScale /= 1.1;
                 }
                 ctx.render();
             };

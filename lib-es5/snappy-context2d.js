@@ -210,10 +210,10 @@ var SnappyContext2D = function () {
                 closePath: { isPath: true },
                 moveTo: { isPath: true, args: [_posx, _posy] },
                 lineTo: { isPath: true, args: [_posx, _posy] },
-                // TODO bezierCurveTo()
-                // TODO quadraticCurveTo()
-                // TODO arc()
-                // TODO arcTo()
+                bezierCurveTo: { isPath: true, args: [_posx, _posy, _posx, _posy, _posx, _posy] },
+                quadraticCurveTo: { isPath: true, args: [_posx, _posy, _posx, _posy] },
+                arc: { isPath: true, args: [_posx, _posy, _size, _nop, _nop, _nop] },
+                arcTo: { isPath: true, args: [_posx, _posy, _posx, _posy, _size] },
                 // TODO ellipse()   /!\ Experimental
                 rect: { args: [_posx, _posy, _size, _size] },
 
@@ -231,7 +231,7 @@ var SnappyContext2D = function () {
                 // TODO isPointInStroke()
 
                 // Transformation
-                // TODO currentTransform per every
+                // TODO currentTransform   /!\ Experimental
                 // TODO rotate()
                 // TODO scale()
                 // TODO translate()
@@ -323,12 +323,12 @@ var SnappyContext2D = function () {
             return this._options.globalScale;
         },
         set: function set(scale) {
-            var uWidth = this._context2d.canvas.uWidth;
-            var uHeight = this._context2d.canvas.uHeight;
-            this._options.globalScale = scale;
-            if (uWidth !== undefined && uHeight !== undefined && this._options.autoResizeCanvas) {
-                this._context2d.canvas.uWidth = uWidth;
-                this._context2d.canvas.uHeight = uHeight;
+            var contentWidth = this._context2d.canvas.contentWidth;
+            var contentHeight = this._context2d.canvas.contentHeight;
+            this._options.globalScale = Math.max(0.0001, scale);
+            if (contentWidth !== undefined && contentHeight !== undefined && this._options.autoResizeCanvas) {
+                this._context2d.canvas.contentWidth = contentWidth;
+                this._context2d.canvas.contentHeight = contentHeight;
             }
         }
     }, {

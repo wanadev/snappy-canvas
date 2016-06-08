@@ -37,6 +37,8 @@ SnappyCanvas.transformCanvas = function (canvas) {
 
     var context2d = canvas.getContext("2d");
     var snappyContext2d = new SnappyContext2D(context2d, options);
+    var contentWidth = null;
+    var contentHeight = null;
 
     canvas.getContext = function (contextType) {
         if (contextType == "snappy") {
@@ -46,6 +48,42 @@ SnappyCanvas.transformCanvas = function (canvas) {
         }
     };
 
+    Object.defineProperty(canvas, "contentWidth", {
+        enumerable: true,
+        configurable: false,
+        get: function get() {
+            if (contentWidth === null) {
+                return this.width / snappyContext2d.globalScale | 0;
+            } else {
+                return contentWidth | 0;
+            }
+        },
+        set: function set(width) {
+            contentWidth = width;
+            if (options.autoResizeCanvas) {
+                this.width = width * snappyContext2d.globalScale | 0;
+            }
+        }
+    });
+
+    Object.defineProperty(canvas, "contentHeight", {
+        enumerable: true,
+        configurable: false,
+        get: function get() {
+            if (contentHeight === null) {
+                return this.height / snappyContext2d.globalScale | 0;
+            } else {
+                return contentHeight | 0;
+            }
+        },
+        set: function set(height) {
+            contentHeight = height | 0;
+            if (options.autoResizeCanvas) {
+                this.height = height * snappyContext2d.globalScale | 0;
+            }
+        }
+    });
+
     if (options.width) {
         canvas.width = options.width;
     }
@@ -53,35 +91,13 @@ SnappyCanvas.transformCanvas = function (canvas) {
         canvas.height = options.height;
     }
 
-    if (options.uWidth) {
-        canvas.uWidth = options.uWidth;
+    if (options.contentWidth) {
+        canvas.contentWidth = options.contentWidth;
     }
 
-    if (options.uHeight) {
-        canvas.uHeight = options.uHeight;
+    if (options.contentHeight) {
+        canvas.contentHeight = options.contentHeight;
     }
-
-    Object.defineProperty(canvas, "uWidth", {
-        enumerable: true,
-        configurable: false,
-        get: function get() {
-            return this.width / snappyContext2d.globalScale | 0;
-        },
-        set: function set(uWidth) {
-            this.width = uWidth * snappyContext2d.globalScale | 0;
-        }
-    });
-
-    Object.defineProperty(canvas, "uHeight", {
-        enumerable: true,
-        configurable: false,
-        get: function get() {
-            return this.height / snappyContext2d.globalScale | 0;
-        },
-        set: function set(uHeight) {
-            this.height = uHeight * snappyContext2d.globalScale | 0;
-        }
-    });
 };
 
 module.exports = SnappyCanvas;
@@ -320,7 +336,7 @@ var SnappyContext2D = function () {
                 // TODO isPointInStroke()
 
                 // Transformation
-                // TODO currentTransform per every
+                // TODO currentTransform   /!\ Experimental
                 // TODO rotate()
                 // TODO scale()
                 // TODO translate()
@@ -412,12 +428,12 @@ var SnappyContext2D = function () {
             return this._options.globalScale;
         },
         set: function set(scale) {
-            var uWidth = this._context2d.canvas.uWidth;
-            var uHeight = this._context2d.canvas.uHeight;
-            this._options.globalScale = scale;
-            if (uWidth !== undefined && uHeight !== undefined && this._options.autoResizeCanvas) {
-                this._context2d.canvas.uWidth = uWidth;
-                this._context2d.canvas.uHeight = uHeight;
+            var contentWidth = this._context2d.canvas.contentWidth;
+            var contentHeight = this._context2d.canvas.contentHeight;
+            this._options.globalScale = Math.max(0.0001, scale);
+            if (contentWidth !== undefined && contentHeight !== undefined && this._options.autoResizeCanvas) {
+                this._context2d.canvas.contentWidth = contentWidth;
+                this._context2d.canvas.contentHeight = contentHeight;
             }
         }
     }, {
