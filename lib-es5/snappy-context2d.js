@@ -161,7 +161,7 @@ var SnappyContext2D = function () {
             var operations = {
 
                 // Drawing rectangles
-                // TODO clearRect()
+                clearRect: { isStroke: 0, args: [_posx, _posy, _size, _size] },
                 fillRect: { isStroke: 0, args: [_posx, _posy, _size, _size] },
                 strokeRect: { isStroke: 1, args: [_posx, _posy, _size, _size] },
 
@@ -181,18 +181,18 @@ var SnappyContext2D = function () {
                         canvasStatus.lw = lineWidth;
                         ctx.lineWidth = lineWidth;
                     } },
-                // TODO lineCap
-                // TODO lineJoin
-                // TODO miterLimit
+                lineCap: { args: [_nop] },
+                lineJoin: { args: [_nop] },
+                miterLimit: { args: [_nop] },
                 // TODO getLineDash()
                 // TODO setLineDash()
                 // TODO lineDashOffset
 
                 // Text styles
                 // TODO font
-                // TODO textAlign
-                // TODO textBaseline
-                // TODO direction
+                textAlign: { args: [_nop] },
+                textBaseline: { args: [_nop] },
+                direction: { args: [_nop] },
 
                 // Fill and stroke styles
                 fillStyle: { args: [_nop] },
@@ -205,7 +205,7 @@ var SnappyContext2D = function () {
 
                 // Shadows
                 // TODO shadowBlur
-                // TODO shadowColor
+                shadowColor: { args: [_nop] },
                 // TODO shadowOffsetX
                 // TODO shadowOffsetY
 
@@ -245,8 +245,8 @@ var SnappyContext2D = function () {
                 // TODO resetTransform()    /!\ Experimental
 
                 // Compositing
-                // TODO globalAlpha
-                // TODO globalCompositeOperation
+                globalAlpha: { args: [_nop] },
+                globalCompositeOperation: { args: [_nop] },
 
                 // Drawing images
                 // TODO drawImage
@@ -257,7 +257,7 @@ var SnappyContext2D = function () {
                 // TODO putImageData()
 
                 // Image smoothing
-                // TODO imageSmoothingEnabled       /!\ Experimental
+                imageSmoothingEnabled: { args: [_nop] },
 
                 // The canvas state
                 save: { fn: function fn(_) {

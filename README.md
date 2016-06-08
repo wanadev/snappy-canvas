@@ -1,5 +1,6 @@
 # SnappyCanvas - Canvas where everything is snapped to nearest pixel
 
+[![Travis CI](https://travis-ci.org/wanadev/snappy-canvas.svg)](https://travis-ci.org/wanadev/snappy-canvas)
 [![NPM Version](http://img.shields.io/npm/v/snappy-canvas.svg?style=flat)](https://www.npmjs.com/package/snappy-canvas)
 [![License](http://img.shields.io/npm/l/snappy-canvas.svg?style=flat)](https://github.com/wanadev/snappy-canvas/blob/master/LICENSE)
 
@@ -33,12 +34,12 @@ ctx.stroke();
 
 ctx.beginPath();
 ctx.moveTo(70, 95);
-ctx.arcTo(120, 95, 120, 96, 25);
+ctx.arcTo(120, 95, 120, 120, 25);
 ctx.stroke();
 
 ctx.render();
 ```
 
-* Live example on JSFiddle: [https://jsfiddle.net/hq746L43/2/](https://jsfiddle.net/hq746L43/2/)
+* Live example on JSFiddle: [https://jsfiddle.net/hq746L43/3/](https://jsfiddle.net/hq746L43/3/)
 
 
