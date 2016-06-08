@@ -1,0 +1,7 @@
+dist
+demo.html
+.babelrc
+.gitignore
+.jshintrc
+.tern-project
+.travis.yml

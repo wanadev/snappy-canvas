@@ -2,17 +2,23 @@
   "name": "snappy-canvas",
   "version": "0.0.0",
   "description": "Canvas where everything is snapped to nearest pixel",
-  "main": "lib/index.js",
+  "main": "lib-es5/index.js",
   "scripts": {
     "test": "jshint lib",
     "build": "npm run build-es5 && npm run build-dist && npm run build-uglify",
     "build-es5": "cd lib/ && babel *.js -d ../lib-es5",
     "build-dist": "mkdir -p dist && browserify -t [ babelify --presets [ es2015 ] ] -s SnappyCanvas lib/index.js -o dist/snappy-canvas.js",
     "build-uglify": "uglifyjs dist/snappy-canvas.js -o dist/snappy-canvas.min.js",
-    "watchify": "mkdir -p dist && watchify -v -t [ babelify --presets [ es2015 ] ] -s SnappyCanvas lib/index.js -o dist/snappy-canvas.js"
+    "watchify": "mkdir -p dist && watchify -v -t [ babelify --presets [ es2015 ] ] -s SnappyCanvas lib/index.js -o dist/snappy-canvas.js",
+    "prepublish": "npm run build-es5"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/wanadev/snappy-canvas.git"
   },
   "keywords": [
-    "canvas"
+    "canvas",
+    "browser"
   ],
   "author": "Wanadev <http://www.wanadev.fr/>",
   "license": "BSD-3-Clause",
