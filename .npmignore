@@ -1,5 +1,6 @@
 dist
 demo.html
+render-example.png
 .babelrc
 .gitignore
 .jshintrc
