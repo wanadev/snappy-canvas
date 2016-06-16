@@ -104,10 +104,26 @@
             ctx.strokeStyle = "purple";
             ctx.strokeRect(190, 130, 50, 50);
 
-            ctx.drawImage(testImage, 10, 200);
-            ctx.drawImage(testImage, 70, 200, 25, 25);
-            ctx.drawImage(testImage, 22, 22, 25, 25, 130, 200, 25, 25);
-            ctx.drawImage(testImage, 22, 22, 25, 25, 190, 200, 50, 50);
+            ctx.drawImage(testImage, 10, 190);
+            ctx.drawImage(testImage, 70, 190, 25, 25);
+            ctx.drawImage(testImage, 22, 22, 25, 25, 130, 190, 25, 25);
+            ctx.drawImage(testImage, 22, 22, 25, 25, 190, 190, 50, 50);
+
+            ctx.save();
+            ctx.translate(35, 285);
+
+            ctx.strokeStyle = "#f40";
+            ctx.rotate(45 * Math.PI / 180);
+            ctx.strokeRect(-25, -25, 50, 50);
+
+            ctx.strokeStyle = "#838";
+            ctx.rotate(45 * Math.PI / 180);
+            ctx.strokeRect(-25, -25, 50, 50);
+
+            ctx.restore();
+
+            ctx.strokeStyle = "#2CC";
+            ctx.strokeRect(70, 260, 50, 50);
 
             ctx.render();
 

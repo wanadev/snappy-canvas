@@ -347,7 +347,14 @@ var SnappyContext2D = function () {
 
                 // Transformation
                 // TODO currentTransform   /!\ Experimental
-                // TODO rotate()
+                rotate: { fn: function fn(operation, operationName, angle) {
+                        var tx = canvasStatus.tx * canvasStatus.scale | 0;
+                        var ty = canvasStatus.ty * canvasStatus.scale | 0;
+                        canvasStatus.tx = 0;
+                        canvasStatus.ty = 0;
+                        ctx.translate(tx, ty);
+                        ctx.rotate(angle);
+                    } },
                 scale: { fn: function fn(_) {
                         throw new Error("NotImplementedError: scale is not supported by snappy canvas");
                     } },
