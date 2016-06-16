@@ -27,6 +27,9 @@
     <body>
         <script src="./dist/snappy-canvas.js"></script>
         <script>
+            var testImage = new Image();
+            testImage.src = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyAgMAAABjUWAiAAAADFBMVEUAmQAAmZkA/wAA//+pbrEBAAAACXBIWXMAAA3XAAAN1wFCKJt4AAAAB3RJTUUH4AYQCCAmTFPj+gAAANpJREFUKM9l0jEOwyAMBVCkHqVbTtOlF+mSqfJacYx0iTgNN/AVqiyeLGrAdqAl0wv5xlgJ92HdApRz5bCe4ByepygHOD9FEbpARB6TKsAeqyoWxCYLQhNZrIkt1qRBVKHGukhjXayxrhZEF+qbLtKvu1grdRVtL//MpekT6rqojlTX27RUXU1RsPveJtpcuyi6kgQX0yPFtFtNPtImj4oO2YkmlNOXxQSil/XCtbPNRGXcwzLmoAw1ufbi51GV94JTnzDegaf70XR3nOYC48ye0zzX/1m7pr/1C3CaCPtSg8pvAAAAAElFTkSuQmCC";
+
             var canvas = new SnappyCanvas({
                 width: 800,
                 height: 600,
@@ -101,6 +104,11 @@
 
             ctx.strokeStyle = "purple";
             ctx.strokeRect(190, 130, 50, 50);
+
+            ctx.drawImage(testImage, 10, 200);
+            ctx.drawImage(testImage, 70, 200, 25, 25);
+            ctx.drawImage(testImage, 22, 22, 25, 25, 130, 200, 25, 25);
+            ctx.drawImage(testImage, 22, 22, 25, 25, 190, 200, 50, 50);
 
             ctx.render();
 

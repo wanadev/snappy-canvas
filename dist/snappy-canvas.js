@@ -210,16 +210,16 @@ var SnappyContext2D = function () {
 
             // Filters
 
-            var _posx = function _posx(x, cs, opt) {
+            var _posx = function _posx(x, cs) {
                 return ((x + cs.tx) * cs.scale | 0) + cs.lw * isStroke % 2 / 2;
             };
-            var _posy = function _posy(y, cs, opt) {
+            var _posy = function _posy(y, cs) {
                 return ((y + cs.ty) * cs.scale | 0) + cs.lw * isStroke % 2 / 2;
             };
-            var _size = function _size(s, cs, opt) {
+            var _size = function _size(s, cs) {
                 return s * cs.scale | 0;
             };
-            var _nop = function _nop(v, cs, opt) {
+            var _nop = function _nop(v, cs) {
                 return v;
             };
 
@@ -236,7 +236,7 @@ var SnappyContext2D = function () {
                 }
 
                 for (var i = 0; i < values.length; i++) {
-                    args[i] = operation.args[i](values[i], canvasStatus, options);
+                    args[i] = operation.args[i](values[i], canvasStatus);
                 }
                 _contextOperationCall.apply(undefined, [ctx, operationName].concat(args));
             }
@@ -359,7 +359,44 @@ var SnappyContext2D = function () {
                 globalCompositeOperation: { args: [_nop] },
 
                 // Drawing images
-                // TODO drawImage
+                drawImage: { fn: function fn(operation, operationName) {
+                        for (var _len6 = arguments.length, values = Array(_len6 > 2 ? _len6 - 2 : 0), _key6 = 2; _key6 < _len6; _key6++) {
+                            values[_key6 - 2] = arguments[_key6];
+                        }
+
+                        switch (values.length) {
+                            case 3:
+                                _contextOperationCall(ctx, operationName, values[0], // Image
+                                _posx(values[1], canvasStatus), // dx
+                                _posy(values[2], canvasStatus), // dy
+                                _size(values[0].width, canvasStatus), // dWidth
+                                _size(values[0].height, canvasStatus) // dHeight
+                                );
+                                break;
+                            case 5:
+                                _contextOperationCall(ctx, operationName, values[0], // Image
+                                _posx(values[1], canvasStatus), // dx
+                                _posy(values[2], canvasStatus), // dy
+                                _size(values[3], canvasStatus), // dWidth
+                                _size(values[4], canvasStatus) // dHeight
+                                );
+                                break;
+                            case 9:
+                                _contextOperationCall(ctx, operationName, values[0], // Image
+                                values[1], // sx
+                                values[2], // sy
+                                values[3], // sWidth
+                                values[4], // sHeight
+                                _posx(values[5], canvasStatus), // dx
+                                _posy(values[6], canvasStatus), // dy
+                                _size(values[7], canvasStatus), // dWidth
+                                _size(values[8], canvasStatus) // dHeight
+                                );
+                                break;
+                            default:
+                                throw new Error("drawImage: wrong arguments");
+                        }
+                    } },
 
                 // Pixel manipulation
                 // TODO createImageData()

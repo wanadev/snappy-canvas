@@ -1,6 +1,7 @@
 dist
 demo.html
 render-example.png
+test-image.png
 .babelrc
 .gitignore
 .jshintrc
