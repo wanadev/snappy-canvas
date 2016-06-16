@@ -7,6 +7,9 @@ var helpers = {
             dest[prop] = src[prop];
         }
         return dest;
+    },
+    clone: function clone(obj) {
+        return JSON.parse(JSON.stringify(obj));
     }
 };
 
@@ -185,6 +188,7 @@ var SnappyContext2D = function () {
             var options = this._options;
 
             var pathStack = [];
+            var canvasStatusStack = [];
             var isStroke = 0;
 
             var canvasStatus = {
@@ -407,16 +411,18 @@ var SnappyContext2D = function () {
                 imageSmoothingEnabled: { args: [_nop] },
 
                 // The canvas state
-                save: { fn: function fn(_) {
-                        return console.error("SnappyContext2D: the 'save' operation is not implemented yet!");
-                    } }, // FIXME
-                restore: { fn: function fn(_) {
-                        return console.error("SnappyContext2D: the 'restore' operation is not implemented yet!");
-                    } } };
+                save: { fn: function fn(operation, operationName) {
+                        canvasStatusStack.push(helpers.clone(canvasStatus));
+                        ctx.save();
+                    } },
+                restore: { fn: function fn(operation, operationName) {
+                        canvasStatus = canvasStatusStack.pop();
+                        ctx.restore();
+                    } }
+
+            };
 
             // Let it draw! Let it draw!
-
-            //FIXME
 
             // Hit regions
             // TODO addHitRegion()        /!\ Experimental

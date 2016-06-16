@@ -6,6 +6,9 @@ var helpers = {
             dest[prop] = src[prop];
         }
         return dest;
+    },
+    clone: function clone(obj) {
+        return JSON.parse(JSON.stringify(obj));
     }
 };
 
