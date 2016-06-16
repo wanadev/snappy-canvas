@@ -92,6 +92,16 @@
             ctx.arcTo(120, 155, 120, 160, 25);
             ctx.stroke();
 
+            ctx.translate(130, 130);
+
+            ctx.strokeStyle = "green";
+            ctx.strokeRect(0, 0, 50, 50);
+
+            ctx.translate(-130, -130);
+
+            ctx.strokeStyle = "purple";
+            ctx.strokeRect(190, 130, 50, 50);
+
             ctx.render();
 
             // Additional code for live translation & scaling
