@@ -83,6 +83,16 @@ var SnappyContext2D = function () {
     }
 
     _createClass(SnappyContext2D, [{
+        key: "measureText",
+        value: function measureText(text) {
+            var ctx = this._context2d;
+            ctx.save();
+            ctx.font = this._contextStatus.font;
+            var textMeasure = ctx.measureText(text);
+            ctx.restore();
+            return textMeasure;
+        }
+    }, {
         key: "setSnappyOptions",
         value: function setSnappyOptions(options) {
             helpers.merge(this._options, options);
@@ -170,8 +180,8 @@ var SnappyContext2D = function () {
             function _operationUnimplemented(operation, operationName) {
                 console.warn("SnappyContext2D: the \"" + operationName + "\" operation is not implemented by SnappyCanvas. The output may be ugly!");
                 ctx.save();
-                ctx.translate(contextStatus.tx | 0, contextStatus.ty | 0);
                 ctx.scale(contextStatus.scale, contextStatus.scale);
+                ctx.translate(contextStatus.tx, contextStatus.ty);
 
                 for (var _len5 = arguments.length, values = Array(_len5 > 2 ? _len5 - 2 : 0), _key5 = 2; _key5 < _len5; _key5++) {
                     values[_key5 - 2] = arguments[_key5];
@@ -189,9 +199,36 @@ var SnappyContext2D = function () {
                 strokeRect: { isStroke: 1, args: [_posx, _posy, _size, _size] },
 
                 // Drawing text
+                fillText: { fn: function fn(operation, operationName) {
+                        ctx.save();
+                        ctx.scale(contextStatus.scale, contextStatus.scale);
+                        ctx.translate(contextStatus.tx, contextStatus.ty);
+
+                        for (var _len6 = arguments.length, values = Array(_len6 > 2 ? _len6 - 2 : 0), _key6 = 2; _key6 < _len6; _key6++) {
+                            values[_key6 - 2] = arguments[_key6];
+                        }
+
+                        ctx[operationName].apply(ctx, values);
+                        ctx.restore();
+                    } },
+                strokeText: { fn: function fn(operation, operationName) {
+                        ctx.save();
+                        ctx.scale(contextStatus.scale, contextStatus.scale);
+                        ctx.translate(contextStatus.tx, contextStatus.ty);
+                        if (!options.scaleLineWidth) {
+                            ctx.lineWidth = contextStatus.lw / contextStatus.scale;
+                        }
+
+                        for (var _len7 = arguments.length, values = Array(_len7 > 2 ? _len7 - 2 : 0), _key7 = 2; _key7 < _len7; _key7++) {
+                            values[_key7 - 2] = arguments[_key7];
+                        }
+
+                        ctx[operationName].apply(ctx, values);
+                        ctx.restore();
+                    } },
                 // TODO fillText()
                 // TODO strokeText()
-                // TODO measureText()
+                // measureText()  -> implemented in the class
 
                 // Line style
                 lineWidth: { fn: function fn(operation, operationName) {
@@ -212,7 +249,7 @@ var SnappyContext2D = function () {
                 // TODO lineDashOffset
 
                 // Text styles
-                // TODO font
+                font: { args: [_nop] },
                 textAlign: { args: [_nop] },
                 textBaseline: { args: [_nop] },
                 direction: { args: [_nop] },
@@ -285,8 +322,8 @@ var SnappyContext2D = function () {
 
                 // Drawing images
                 drawImage: { fn: function fn(operation, operationName) {
-                        for (var _len6 = arguments.length, values = Array(_len6 > 2 ? _len6 - 2 : 0), _key6 = 2; _key6 < _len6; _key6++) {
-                            values[_key6 - 2] = arguments[_key6];
+                        for (var _len8 = arguments.length, values = Array(_len8 > 2 ? _len8 - 2 : 0), _key8 = 2; _key8 < _len8; _key8++) {
+                            values[_key8 - 2] = arguments[_key8];
                         }
 
                         switch (values.length) {
