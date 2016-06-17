@@ -182,11 +182,119 @@ canvas.
 
 ### CanvasRenderingContext2D supported operations
 
-TODO
+Note that the support of the following operation do not only depend on
+`SnappyCanvas` but also depend on the Browser implementation of the canvas.
 
-### CanvasRenderingContext2D unsupported operations
+You can find the documentation related to all those operation on MDN:
+[`CanvasRenderingContext2D`][ctx2d].
 
-TODO
+#### Drawing rectangles
+
+* `clearRect()`
+* `fillRect()`
+* `strokeRect()`
+
+#### Drawing text
+
+* `fillText()`
+* `strokeText()`
+* `measureText()`
+
+#### Line style
+
+* `lineWidth`
+* `lineCap`
+* `lineJoin`
+* `miterLimit`
+* ~~`getLineDash()`~~ **TODO**
+* ~~`setLineDash()`~~ **TODO**
+* ~~`lineDashOffset`~~ **TODO**
+
+#### Text styles
+
+* `font`
+* `textAlign`
+* `textBaseline`
+* `direction`
+
+#### Fill and stroke styles
+
+* `fillStyle`
+* `strokeStyle`
+
+#### Gradients and patterns
+
+* ~~`createLinearGradient()`~~ **TODO**
+* ~~`createRadialGradient()`~~ **TODO**
+* ~~`createPattern()`~~ **TODO**
+
+#### Shadows
+
+* ~~`shadowBlur`~~ **TODO**
+* `shadowColor`
+* ~~`shadowOffsetX`~~ **TODO**
+* ~~`shadowOffsetY`~~ **TODO**
+
+#### Path
+
+* `beginPath()`
+* `closePath()`
+* `moveTo()`
+* `lineTo()`
+* `bezierCurveTo()`
+* `quadraticCurveTo()`
+* `arc()`
+* `arcTo()`
+* ~~`ellipse()`~~ **TODO**
+* `rect()`
+
+#### Drawing paths
+
+* `fill()`
+* `stroke()`
+* ~~`drawFocusIfNeeded()`~~ **TODO**
+* ~~`scrollPathIntoView()`~~ **TODO**
+* ~~`clip()`~~ **TODO**
+* ~~`isPointInPath()`~~ **TODO**
+* ~~`isPointInStroke()`~~ **TODO**
+
+#### Transformation
+
+* ~~`currentTransform`~~ **NOT SUPPORTED**
+* ~~`scale()`~~ **NOT SUPPORTED**
+* ~~`translate()`~~
+* ~~`transform()`~~ **NOT SUPPORTED**
+* ~~`resetTransform()`~~ **NOT SUPPORTED**
+
+#### Compositing
+
+* `globalAlpha`
+* `globalCompositeOperation`
+
+#### Drawing images
+
+* `drawImage()`
+
+#### Pixel manipulation
+
+* ~~`createImageData()`~~ **NOT SUPPORTED**
+* ~~`getImageData()`~~ **NOT SUPPORTED**
+* ~~`putImageData()`~~ **NOT SUPPORTED**
+
+#### Image smoothing
+
+* `imageSmoothingEnabled`
+
+#### The canvas state
+
+* `save()`
+* `restore()`
+
+#### Hit regions
+
+* ~~`addHitRegion()`~~ **TODO**
+* ~~`removeHitRegion()`~~ **TODO**
+* ~~`clearHitRegion()`~~ **TODO**
 
 
 [canvas-getcontext]: https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/getContext
