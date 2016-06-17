@@ -178,17 +178,7 @@ var SnappyContext2D = function () {
             }
 
             function _operationUnimplemented(operation, operationName) {
-                console.warn("SnappyContext2D: the \"" + operationName + "\" operation is not implemented by SnappyCanvas. The output may be ugly!");
-                ctx.save();
-                ctx.scale(contextStatus.scale, contextStatus.scale);
-                ctx.translate(contextStatus.tx, contextStatus.ty);
-
-                for (var _len5 = arguments.length, values = Array(_len5 > 2 ? _len5 - 2 : 0), _key5 = 2; _key5 < _len5; _key5++) {
-                    values[_key5 - 2] = arguments[_key5];
-                }
-
-                _contextOperationCall.apply(undefined, [ctx, operationName].concat(values));
-                ctx.restore();
+                throw new Error("SnappyContext2D: operation not supported: " + operationName + ".");
             }
 
             var operations = {
@@ -204,8 +194,8 @@ var SnappyContext2D = function () {
                         ctx.scale(contextStatus.scale, contextStatus.scale);
                         ctx.translate(contextStatus.tx, contextStatus.ty);
 
-                        for (var _len6 = arguments.length, values = Array(_len6 > 2 ? _len6 - 2 : 0), _key6 = 2; _key6 < _len6; _key6++) {
-                            values[_key6 - 2] = arguments[_key6];
+                        for (var _len5 = arguments.length, values = Array(_len5 > 2 ? _len5 - 2 : 0), _key5 = 2; _key5 < _len5; _key5++) {
+                            values[_key5 - 2] = arguments[_key5];
                         }
 
                         ctx[operationName].apply(ctx, values);
@@ -219,15 +209,13 @@ var SnappyContext2D = function () {
                             ctx.lineWidth = contextStatus.lw / contextStatus.scale;
                         }
 
-                        for (var _len7 = arguments.length, values = Array(_len7 > 2 ? _len7 - 2 : 0), _key7 = 2; _key7 < _len7; _key7++) {
-                            values[_key7 - 2] = arguments[_key7];
+                        for (var _len6 = arguments.length, values = Array(_len6 > 2 ? _len6 - 2 : 0), _key6 = 2; _key6 < _len6; _key6++) {
+                            values[_key6 - 2] = arguments[_key6];
                         }
 
                         ctx[operationName].apply(ctx, values);
                         ctx.restore();
                     } },
-                // TODO fillText()
-                // TODO strokeText()
                 // measureText()  -> implemented in the class
 
                 // Line style
@@ -297,7 +285,7 @@ var SnappyContext2D = function () {
                 // TODO isPointInStroke()
 
                 // Transformation
-                // TODO currentTransform   /!\ Experimental
+                // currentTransform    -> not supported
                 rotate: { fn: function fn(operation, operationName, angle) {
                         var tx = contextStatus.tx * contextStatus.scale | 0;
                         var ty = contextStatus.ty * contextStatus.scale | 0;
@@ -306,15 +294,13 @@ var SnappyContext2D = function () {
                         ctx.translate(tx, ty);
                         ctx.rotate(angle);
                     } },
-                scale: { fn: function fn(_) {
-                        throw new Error("NotImplementedError: scale is not supported by snappy canvas");
-                    } },
+                // scale               -> not supported
                 translate: { fn: function fn(operation, operationName, tx, ty) {
                         contextStatus.tx += tx;
                         contextStatus.ty += ty;
                     } },
-                // TODO transform()
-                // TODO resetTransform()    /!\ Experimental
+                // transform()         -> not supported
+                // resetTransform()    -> not supported
 
                 // Compositing
                 globalAlpha: { args: [_nop] },
@@ -322,8 +308,8 @@ var SnappyContext2D = function () {
 
                 // Drawing images
                 drawImage: { fn: function fn(operation, operationName) {
-                        for (var _len8 = arguments.length, values = Array(_len8 > 2 ? _len8 - 2 : 0), _key8 = 2; _key8 < _len8; _key8++) {
-                            values[_key8 - 2] = arguments[_key8];
+                        for (var _len7 = arguments.length, values = Array(_len7 > 2 ? _len7 - 2 : 0), _key7 = 2; _key7 < _len7; _key7++) {
+                            values[_key7 - 2] = arguments[_key7];
                         }
 
                         switch (values.length) {
@@ -356,14 +342,14 @@ var SnappyContext2D = function () {
                                 );
                                 break;
                             default:
-                                throw new Error("drawImage: wrong arguments");
+                                throw new Error("SnappyContext2D: Wrong arguments for drawImage");
                         }
                     } },
 
                 // Pixel manipulation
-                // TODO createImageData()
-                // TODO getImageData()
-                // TODO putImageData()
+                // createImageData  -> not supported
+                // getImageData     -> not supported
+                // putImageData     -> not supported
 
                 // Image smoothing
                 imageSmoothingEnabled: { args: [_nop] },
