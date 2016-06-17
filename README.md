@@ -4,9 +4,9 @@
 [![NPM Version](http://img.shields.io/npm/v/snappy-canvas.svg?style=flat)](https://www.npmjs.com/package/snappy-canvas)
 [![License](http://img.shields.io/npm/l/snappy-canvas.svg?style=flat)](https://github.com/wanadev/snappy-canvas/blob/master/LICENSE)
 
-Snappy canvas is an HTML5 canvas that provides a `"snappy"` 2D context that
-provides an API similar to the standard 2D context but that approximate
-everything to the nearest pixel: no more blurry draw!
+Snappy canvas is an HTML5 canvas that provides a `"snappy"` 2D context with
+an API similar to the standard 2D context but where everything is approximated
+to the nearest pixel: no more blurry drawings!
 
 ![Snappy Context 2D vs Standard Context 2D](./render-example.png)
 
@@ -45,7 +45,7 @@ ctx.render();
 
 * `options`: Object -- The SnappyCanvas and SnappyContext2D options.
 
-```javasctipt
+```javascript
 {
     // SnappyCanvas options
     width: <Number>,               // Width of the canvas HTML element
@@ -55,8 +55,8 @@ ctx.render();
 
     // SnappyContext2D options
     globalScale: <Number>,         // Initial scale of the snappy context (default 1)
-    globalTranslationX: <Number>,  // Initial translation x of the snappy context (default 0)
-    globalTranslationY: <Number>,  // Initial translation y of the snappy context (default 0)
+    globalTranslationX: <Number>,  // Initial x translation of the snappy context (default 0)
+    globalTranslationY: <Number>,  // Initial y translation of the snappy context (default 0)
     scaleLineWidth: <Boolean>,     // If true, the snappy context will scale the line width according to scale (default true)
     autoResizeCanvas: <Boolean>    // Allow canvas to be resized when `SnappyContext2D.globalScale` changes
 }
@@ -69,7 +69,7 @@ some additional properties.
 
     canvas.getContext(contextType [, contextAttributes]) -> SnappyContext2D
 
-Like the standard [`HTMLCanvasElement.getContext()`][canvas-getcontext] but
+Same as the standard [`HTMLCanvasElement.getContext()`][canvas-getcontext] but
 with an additional `contextType`: `"snappy"`.
 
 Example:
@@ -99,14 +99,14 @@ Height of the drawing at scale 1 (useful when `autoResize` enabled).
 The main differences between the standard context 2D and the snappy context 2D
 are:
 
-* the snappy context 2D **do not** draw anything when you call drawing
-  operation: it just stack the operations and draw everything when you call the
-  `render()`.
+* the snappy context 2D **does not** draw anything when you call a drawing
+  operation: it just stacks the operations and draws everything when you call the
+  `render()` method.
 * you can change the global scale and translation of the snappy context at any
-  time and **everything will be automatically redraw** according to the new
+  time and **everything will be automatically redrawn** according to the new
   parameters (no need to repeat the operations yourself).
 
-To access to the snappy context, just request it from a `SnappyCanvas`:
+To access the snappy context, just request it from a `SnappyCanvas`:
 
 ```javascript
 var canvas = new SnappyCanvas();
@@ -141,7 +141,7 @@ __NOTE:__ The canvas is automatically updated when this value is changed.
 
     ctx.scaleLineWidth = <Boolean>
 
-Determine if the line width is scaled (`true`, default) or if it keep the same
+Determines if the line width is scaled (`true`, default) or if it keeps the same
 thickness at each scale (`false`).
 
 __NOTE:__ The canvas is automatically updated when this value is changed.
@@ -150,15 +150,15 @@ __NOTE:__ The canvas is automatically updated when this value is changed.
 
     ctx.setSnappyOptions(options)
 
-Set multiple options in one round.
+Sets multiple options in one round.
 
 * `options`: Object -- The SnappyContext2D options.
 
-```javasctipt
+```javascript
 {
     globalScale: <Number>,         // Initial scale of the snappy context (default 1)
-    globalTranslationX: <Number>,  // Initial translation x of the snappy context (default 0)
-    globalTranslationY: <Number>,  // Initial translation y of the snappy context (default 0)
+    globalTranslationX: <Number>,  // Initial x translation of the snappy context (default 0)
+    globalTranslationY: <Number>,  // Initial y translation of the snappy context (default 0)
     scaleLineWidth: <Boolean>,     // If true, the snappy context will scale the line width according to scale (default true)
     autoResizeCanvas: <Boolean>    // Allow canvas to be resized when `SnappyContext2D.globalScale` changes
 }
@@ -170,7 +170,7 @@ __NOTE:__ The canvas is automatically updated when this value is changed.
 
     ctx.clear()
 
-Clear the canvas and empty the drawing operation stack. Must be used as
+Clears the canvas and empties the drawing operation stack. Must be used as
 replacement of `ctx.clearRect(0, 0, canvas.width, canvas.height)`) to clear the
 canvas.
 
@@ -178,12 +178,12 @@ canvas.
 
     ctx.render()
 
-(Re)paint all the drawing.
+(Re)paints all the drawings.
 
 ### CanvasRenderingContext2D supported operations
 
-Note that the support of the following operation do not only depend on
-`SnappyCanvas` but also depend on the Browser implementation of the canvas.
+Note that the support of the following operations does not only depend on
+`SnappyCanvas` but also depends on the Browser implementation of the canvas.
 
 You can find the documentation related to all those operation on MDN:
 [`CanvasRenderingContext2D`][ctx2d].
