@@ -262,7 +262,7 @@ You can find the documentation related to all those operation on MDN:
 
 * ~~`currentTransform`~~ **NOT SUPPORTED**
 * ~~`scale()`~~ **NOT SUPPORTED**
-* ~~`translate()`~~
+* `translate()`
 * ~~`transform()`~~ **NOT SUPPORTED**
 * ~~`resetTransform()`~~ **NOT SUPPORTED**
 
