@@ -64,7 +64,7 @@ SnappyCanvas.transformCanvas = function (canvas) {
         set: function set(width) {
             contentWidth = width;
             if (options.autoResizeCanvas) {
-                this.width = width * snappyContext2d.globalScale | 0;
+                this.width = width * snappyContext2d.globalScale + 1 | 0;
             }
         }
     });
@@ -82,7 +82,7 @@ SnappyCanvas.transformCanvas = function (canvas) {
         set: function set(height) {
             contentHeight = height | 0;
             if (options.autoResizeCanvas) {
-                this.height = height * snappyContext2d.globalScale | 0;
+                this.height = height * snappyContext2d.globalScale + 1 | 0;
             }
         }
     });
