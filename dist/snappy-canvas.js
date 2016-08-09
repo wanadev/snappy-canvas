@@ -340,7 +340,7 @@ var SnappyContext2D = function () {
                 lineCap: { args: [_nop] },
                 lineJoin: { args: [_nop] },
                 miterLimit: { args: [_nop] },
-                getLineDash: { args: [_nop] },
+                getLineDash: { args: [] },
                 setLineDash: { fn: function fn(operation, operationName) {
                         for (var _len7 = arguments.length, values = Array(_len7 > 2 ? _len7 - 2 : 0), _key7 = 2; _key7 < _len7; _key7++) {
                             values[_key7 - 2] = arguments[_key7];
@@ -489,6 +489,11 @@ var SnappyContext2D = function () {
             };
 
             // Let it draw! Let it draw!
+
+            // Hit regions
+            // TODO addHitRegion()        /!\ Experimental
+            // TODO removeHitRegion()     /!\ Experimental
+            // TODO clearHitRegion()      /!\ Experimental
 
             function _drawStack(stack) {
                 var skipPathOperations = arguments.length <= 1 || arguments[1] === undefined ? true : arguments[1];
