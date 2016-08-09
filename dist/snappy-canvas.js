@@ -341,15 +341,19 @@ var SnappyContext2D = function () {
                 lineJoin: { args: [_nop] },
                 miterLimit: { args: [_nop] },
                 getLineDash: { args: [_nop] },
-                setLineDash: { fn: function fn(operation, operationName, dash) {
-                        var tmp = dash.slice(0);
+                setLineDash: { fn: function fn(operation, operationName) {
+                        for (var _len7 = arguments.length, values = Array(_len7 > 2 ? _len7 - 2 : 0), _key7 = 2; _key7 < _len7; _key7++) {
+                            values[_key7 - 2] = arguments[_key7];
+                        }
+
+                        var tmp = values[0] ? values[0].slice(0) : [];
                         for (var i = 0; i < tmp.length; i++) {
                             tmp[i] *= contextStatus.scale;
                         }
                         ctx.setLineDash(tmp);
                     } },
-                lineDashOffset: { fn: function fn(operation, operationName, dashOffset) {
-                        ctx.lineDashOffset = dashOffset * contextStatus.scale;
+                lineDashOffset: { fn: function fn(operation, operationName) {
+                        ctx.lineDashOffset = (arguments.length <= 2 ? undefined : arguments[2]) * contextStatus.scale | 0;
                     } },
 
                 // Text styles
@@ -424,8 +428,8 @@ var SnappyContext2D = function () {
 
                 // Drawing images
                 drawImage: { fn: function fn(operation, operationName) {
-                        for (var _len7 = arguments.length, values = Array(_len7 > 2 ? _len7 - 2 : 0), _key7 = 2; _key7 < _len7; _key7++) {
-                            values[_key7 - 2] = arguments[_key7];
+                        for (var _len8 = arguments.length, values = Array(_len8 > 2 ? _len8 - 2 : 0), _key8 = 2; _key8 < _len8; _key8++) {
+                            values[_key8 - 2] = arguments[_key8];
                         }
 
                         switch (values.length) {
