@@ -347,13 +347,15 @@ var SnappyContext2D = function () {
                         }
 
                         var tmp = values[0] ? values[0].slice(0) : [];
-                        for (var i = 0; i < tmp.length; i++) {
-                            tmp[i] *= contextStatus.scale;
+                        if (options.scaleLineWidth) {
+                            for (var i = 0; i < tmp.length; i++) {
+                                tmp[i] *= contextStatus.scale;
+                            }
                         }
                         ctx.setLineDash(tmp);
                     } },
                 lineDashOffset: { fn: function fn(operation, operationName) {
-                        ctx.lineDashOffset = (arguments.length <= 2 ? undefined : arguments[2]) * contextStatus.scale | 0;
+                        ctx.lineDashOffset = (arguments.length <= 2 ? undefined : arguments[2]) * (contextStatus.scaleLineWidth ? contextStatus.scale : 1) | 0;
                     } },
 
                 // Text styles
