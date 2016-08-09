@@ -120,6 +120,23 @@
             ctx.rotate(45 * Math.PI / 180);
             ctx.strokeRect(-25, -25, 50, 50);
 
+
+            ctx.restore();
+
+            ctx.save();
+            ctx.translate(155, 285);
+
+            ctx.setLineDash([2, 4, 8]);
+            ctx.lineDashOffset = 15;
+            ctx.beginPath();
+            ctx.moveTo(-25, -25);
+            ctx.lineTo(25, -25);
+            ctx.lineTo(25, 25);
+            ctx.lineTo(-25, 25);
+            ctx.closePath();
+            ctx.stroke();
+            ctx.setLineDash([]);
+
             ctx.restore();
 
             ctx.strokeStyle = "#2CC";

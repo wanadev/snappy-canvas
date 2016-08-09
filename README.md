@@ -206,9 +206,9 @@ You can find the documentation related to all those operation on MDN:
 * `lineCap`
 * `lineJoin`
 * `miterLimit`
-* ~~`getLineDash()`~~ **TODO**
-* ~~`setLineDash()`~~ **TODO**
-* ~~`lineDashOffset`~~ **TODO**
+* `getLineDash()`
+* `setLineDash()`
+* `lineDashOffset`
 
 #### Text styles
 
