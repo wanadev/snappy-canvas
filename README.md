@@ -297,5 +297,13 @@ You can find the documentation related to all those operation on MDN:
 * ~~`clearHitRegion()`~~ **TODO**
 
 
+## Changelog
+
+* **0.3.0:**
+  * Context2D: `getLineDash()`, `setLineDash()` and `lineDashOffset` support
+    implemented
+  * Fixes miss behavior when using translation in path operations (#1)
+
+
 [canvas-getcontext]: https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/getContext
 [ctx2d]: https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D

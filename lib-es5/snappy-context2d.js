@@ -397,6 +397,11 @@ var SnappyContext2D = function () {
 
             // Let it draw! Let it draw!
 
+            // Hit regions
+            // TODO addHitRegion()        /!\ Experimental
+            // TODO removeHitRegion()     /!\ Experimental
+            // TODO clearHitRegion()      /!\ Experimental
+
             function _drawStack(stack) {
                 var skipPathOperations = arguments.length <= 1 || arguments[1] === undefined ? true : arguments[1];
 
