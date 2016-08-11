@@ -265,16 +265,20 @@ var SnappyContext2D = function () {
                 if (operation.isStroke !== undefined && operation.isStroke !== null) {
                     isStroke = operation.isStroke;
                 }
-                var args = [];
 
                 for (var _len3 = arguments.length, values = Array(_len3 > 2 ? _len3 - 2 : 0), _key3 = 2; _key3 < _len3; _key3++) {
                     values[_key3 - 2] = arguments[_key3];
                 }
 
-                for (var i = 0; i < values.length; i++) {
-                    args[i] = operation.args[i](values[i], contextStatus);
+                if (!operation.isPath) {
+                    var args = [];
+                    for (var i = 0; i < values.length; i++) {
+                        args[i] = operation.args[i](values[i], contextStatus);
+                    }
+                    _contextOperationCall.apply(undefined, [ctx, operationName].concat(args));
+                } else {
+                    _contextOperationCall.apply(undefined, [ctx, operationName].concat(values));
                 }
-                _contextOperationCall.apply(undefined, [ctx, operationName].concat(args));
             }
 
             function _operationPathStack(operation, operationName) {
@@ -282,7 +286,18 @@ var SnappyContext2D = function () {
                     values[_key4 - 2] = arguments[_key4];
                 }
 
-                pathStack.push([operationName].concat(values));
+                if (operation.isPath) {
+                    if (operation.isStroke !== undefined && operation.isStroke !== null) {
+                        isStroke = operation.isStroke;
+                    }
+                    var args = [];
+                    for (var i = 0; i < values.length; i++) {
+                        args[i] = operation.args[i](values[i], contextStatus);
+                    }
+                    pathStack.push([operationName].concat(args));
+                } else {
+                    pathStack.push([operationName].concat(values));
+                }
             }
 
             function _operationUnimplemented(operation, operationName) {
@@ -489,11 +504,6 @@ var SnappyContext2D = function () {
             };
 
             // Let it draw! Let it draw!
-
-            // Hit regions
-            // TODO addHitRegion()        /!\ Experimental
-            // TODO removeHitRegion()     /!\ Experimental
-            // TODO clearHitRegion()      /!\ Experimental
 
             function _drawStack(stack) {
                 var skipPathOperations = arguments.length <= 1 || arguments[1] === undefined ? true : arguments[1];
