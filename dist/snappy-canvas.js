@@ -36,7 +36,7 @@ var SnappyCanvas = function SnappyCanvas(options) {
 };
 
 SnappyCanvas.transformCanvas = function (canvas) {
-    var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+    var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
 
     var context2d = canvas.getContext("2d");
     var snappyContext2d = new SnappyContext2D(context2d, options);
@@ -118,7 +118,7 @@ var helpers = require("./helpers.js");
 
 var SnappyContext2D = function () {
     function SnappyContext2D(context2d) {
-        var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+        var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
 
         _classCallCheck(this, SnappyContext2D);
 
@@ -405,7 +405,7 @@ var SnappyContext2D = function () {
                 quadraticCurveTo: { isPath: true, args: [_posx, _posy, _posx, _posy] },
                 arc: { isPath: true, args: [_posx, _posy, _size, _nop, _nop, _nop] },
                 arcTo: { isPath: true, args: [_posx, _posy, _posx, _posy, _size] },
-                // TODO ellipse()   /!\ Experimental
+                ellipse: { isPath: true, args: [_posx, _posy, _size, _size, _nop, _nop, _nop, _nop] },
                 rect: { args: [_posx, _posy, _size, _size] },
 
                 // Drawing paths
@@ -505,13 +505,8 @@ var SnappyContext2D = function () {
 
             // Let it draw! Let it draw!
 
-            // Hit regions
-            // TODO addHitRegion()        /!\ Experimental
-            // TODO removeHitRegion()     /!\ Experimental
-            // TODO clearHitRegion()      /!\ Experimental
-
             function _drawStack(stack) {
-                var skipPathOperations = arguments.length <= 1 || arguments[1] === undefined ? true : arguments[1];
+                var skipPathOperations = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : true;
 
                 ctx.beginPath();
 

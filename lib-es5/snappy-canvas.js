@@ -13,7 +13,7 @@ var SnappyCanvas = function SnappyCanvas(options) {
 };
 
 SnappyCanvas.transformCanvas = function (canvas) {
-    var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+    var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
 
     var context2d = canvas.getContext("2d");
     var snappyContext2d = new SnappyContext2D(context2d, options);
