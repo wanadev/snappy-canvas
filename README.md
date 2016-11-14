@@ -299,6 +299,7 @@ You can find the documentation related to all those operation on MDN:
 
 ## Changelog
 
+* **0.4.0:** Context2D: `ellipse()` support implemented
 * **0.3.0:**
   * Context2D: `getLineDash()`, `setLineDash()` and `lineDashOffset` support
     implemented
