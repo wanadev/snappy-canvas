@@ -137,6 +137,14 @@
             ctx.setLineDash([]);
             ctx.restore();
 
+            //ellipse
+            ctx.save();
+            ctx.translate(215, 285);
+            ctx.beginPath();
+            ctx.ellipse(0, 0, 25, 20, 0, Math.PI, 2.5 * Math.PI);
+            ctx.stroke();
+            ctx.restore();
+
             ctx.strokeStyle = "#2CC";
             ctx.strokeRect(70, 260, 50, 50);
 

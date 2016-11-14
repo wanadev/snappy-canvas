@@ -245,7 +245,7 @@ You can find the documentation related to all those operation on MDN:
 * `quadraticCurveTo()`
 * `arc()`
 * `arcTo()`
-* ~~`ellipse()`~~ **TODO**
+* `ellipse()`
 * `rect()`
 
 #### Drawing paths
