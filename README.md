@@ -58,6 +58,7 @@ ctx.render();
     globalTranslationX: <Number>,  // Initial x translation of the snappy context (default 0)
     globalTranslationY: <Number>,  // Initial y translation of the snappy context (default 0)
     scaleLineWidth: <Boolean>,     // If true, the snappy context will scale the line width according to scale (default true)
+    scaleDashLine: <Boolean>,      // If true, the snappy context will scale the dash line according to scale (default true)
     autoResizeCanvas: <Boolean>    // Allow canvas to be resized when `SnappyContext2D.globalScale` changes
 }
 ```
@@ -142,6 +143,15 @@ __NOTE:__ The canvas is automatically updated when this value is changed.
     ctx.scaleLineWidth = <Boolean>
 
 Determines if the line width is scaled (`true`, default) or if it keeps the same
+thickness at each scale (`false`).
+
+__NOTE:__ The canvas is automatically updated when this value is changed.
+
+### SnappyContext2D.scaleDashLine
+
+    ctx.scaleDashLine = <Boolean>
+
+Determines if the dash line is scaled (`true`, default) or if it keeps the same
 thickness at each scale (`false`).
 
 __NOTE:__ The canvas is automatically updated when this value is changed.
