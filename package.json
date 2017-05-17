@@ -7,9 +7,9 @@
     "test": "jshint lib",
     "build": "npm run build-es5 && npm run build-dist && npm run build-uglify",
     "build-es5": "cd lib/ && babel *.js -d ../lib-es5",
-    "build-dist": "rm -rf dist && mkdir dist && browserify -t [ babelify --presets [ es2015 ] ] -s SnappyCanvas lib/index.js -o dist/snappy-canvas.js",
+    "build-dist": "mkdir -p dist && browserify -t [ babelify --presets [ es2015 ] ] -s SnappyCanvas lib/index.js -o dist/snappy-canvas.js",
     "build-uglify": "uglifyjs dist/snappy-canvas.js -o dist/snappy-canvas.min.js",
-    "watchify": "rm -rf dist && mkdir dist && watchify -v -t [ babelify --presets [ es2015 ] ] -s SnappyCanvas lib/index.js -o dist/snappy-canvas.js",
+    "watchify": "mkdir -p dist && watchify -v -t [ babelify --presets [ es2015 ] ] -s SnappyCanvas lib/index.js -o dist/snappy-canvas.js",
     "prepublish": "npm run build-es5"
   },
   "repository": {
