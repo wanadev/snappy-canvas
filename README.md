@@ -3,6 +3,8 @@
 [![Travis CI](https://travis-ci.org/wanadev/snappy-canvas.svg)](https://travis-ci.org/wanadev/snappy-canvas)
 [![NPM Version](http://img.shields.io/npm/v/snappy-canvas.svg?style=flat)](https://www.npmjs.com/package/snappy-canvas)
 [![License](http://img.shields.io/npm/l/snappy-canvas.svg?style=flat)](https://github.com/wanadev/snappy-canvas/blob/master/LICENSE)
+[![Greenkeeper badge](https://badges.greenkeeper.io/wanadev/snappy-canvas.svg)](https://greenkeeper.io/)
+
 
 Snappy canvas is an HTML5 canvas that provides a `"snappy"` 2D context with
 an API similar to the standard 2D context but where everything is approximated
