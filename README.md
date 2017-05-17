@@ -309,6 +309,9 @@ You can find the documentation related to all those operation on MDN:
 
 ## Changelog
 
+* **0.5.0:**
+  * Adds a new option to enable / disable the scale og the dashes width
+  * Updates uglify-js to 3.0.0
 * **0.4.1:** Updates Browserify to 14.0.0
 * **0.4.0:** Context2D: `ellipse()` support implemented
 * **0.3.0:**
