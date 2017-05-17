@@ -140,7 +140,7 @@ var SnappyContext2D = function () {
                 globalTranslationY: 0,
                 globalScale: 1,
                 scaleLineWidth: true,
-                scaleDashLine: true,
+                scaleDashesWidth: true,
                 autoResizeCanvas: false
             }, options)
         });
@@ -363,7 +363,7 @@ var SnappyContext2D = function () {
                         }
 
                         var tmp = values[0] ? values[0].slice(0) : [];
-                        if (options.scaleDashLine) {
+                        if (options.scaleDashesWidth) {
                             for (var i = 0; i < tmp.length; i++) {
                                 tmp[i] *= contextStatus.scale;
                             }
@@ -371,7 +371,7 @@ var SnappyContext2D = function () {
                         ctx.setLineDash(tmp);
                     } },
                 lineDashOffset: { fn: function fn(operation, operationName) {
-                        ctx.lineDashOffset = (arguments.length <= 2 ? undefined : arguments[2]) * (contextStatus.scaleDashLine ? contextStatus.scale : 1) | 0;
+                        ctx.lineDashOffset = (arguments.length <= 2 ? undefined : arguments[2]) * (contextStatus.scaleDashesWidth ? contextStatus.scale : 1) | 0;
                     } },
 
                 // Text styles
@@ -580,12 +580,12 @@ var SnappyContext2D = function () {
             this.render();
         }
     }, {
-        key: "scaleDashLine",
+        key: "scaleDashesWidth",
         get: function get() {
-            return this._options.scaleDashLine;
+            return this._options.scaleDashesWidth;
         },
-        set: function set(scaleDashLine) {
-            this._options.scaleDashLine = scaleDashLine;
+        set: function set(scaleDashesWidth) {
+            this._options.scaleDashesWidth = scaleDashesWidth;
             this.render();
         }
     }]);
