@@ -140,6 +140,7 @@ var SnappyContext2D = function () {
                 globalTranslationY: 0,
                 globalScale: 1,
                 scaleLineWidth: true,
+                scaleDashesWidth: true,
                 autoResizeCanvas: false
             }, options)
         });
@@ -362,7 +363,7 @@ var SnappyContext2D = function () {
                         }
 
                         var tmp = values[0] ? values[0].slice(0) : [];
-                        if (options.scaleLineWidth) {
+                        if (options.scaleDashesWidth) {
                             for (var i = 0; i < tmp.length; i++) {
                                 tmp[i] *= contextStatus.scale;
                             }
@@ -370,7 +371,7 @@ var SnappyContext2D = function () {
                         ctx.setLineDash(tmp);
                     } },
                 lineDashOffset: { fn: function fn(operation, operationName) {
-                        ctx.lineDashOffset = (arguments.length <= 2 ? undefined : arguments[2]) * (contextStatus.scaleLineWidth ? contextStatus.scale : 1) | 0;
+                        ctx.lineDashOffset = (arguments.length <= 2 ? undefined : arguments[2]) * (contextStatus.scaleDashesWidth ? contextStatus.scale : 1) | 0;
                     } },
 
                 // Text styles
@@ -505,11 +506,6 @@ var SnappyContext2D = function () {
 
             // Let it draw! Let it draw!
 
-            // Hit regions
-            // TODO addHitRegion()        /!\ Experimental
-            // TODO removeHitRegion()     /!\ Experimental
-            // TODO clearHitRegion()      /!\ Experimental
-
             function _drawStack(stack) {
                 var skipPathOperations = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : true;
 
@@ -581,6 +577,15 @@ var SnappyContext2D = function () {
         },
         set: function set(scaleLineWidth) {
             this._options.scaleLineWidth = scaleLineWidth;
+            this.render();
+        }
+    }, {
+        key: "scaleDashesWidth",
+        get: function get() {
+            return this._options.scaleDashesWidth;
+        },
+        set: function set(scaleDashesWidth) {
+            this._options.scaleDashesWidth = scaleDashesWidth;
             this.render();
         }
     }]);
