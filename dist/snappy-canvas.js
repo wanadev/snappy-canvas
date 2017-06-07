@@ -350,6 +350,7 @@ var SnappyContext2D = function () {
                         } else {
                             lineWidth = (arguments.length <= 2 ? undefined : arguments[2]) | 0;
                         }
+                        lineWidth = Math.max(1, lineWidth);
                         contextStatus.lw = lineWidth;
                         ctx.lineWidth = lineWidth;
                     } },
@@ -456,16 +457,16 @@ var SnappyContext2D = function () {
                                 _posx(values[1], contextStatus), // dx
                                 _posy(values[2], contextStatus), // dy
                                 _size(values[0].width, contextStatus), // dWidth
-                                _size(values[0].height, contextStatus) // dHeight
-                                );
+                                _size(values[0].height, contextStatus // dHeight
+                                ));
                                 break;
                             case 5:
                                 _contextOperationCall(ctx, operationName, values[0], // Image
                                 _posx(values[1], contextStatus), // dx
                                 _posy(values[2], contextStatus), // dy
                                 _size(values[3], contextStatus), // dWidth
-                                _size(values[4], contextStatus) // dHeight
-                                );
+                                _size(values[4], contextStatus // dHeight
+                                ));
                                 break;
                             case 9:
                                 _contextOperationCall(ctx, operationName, values[0], // Image
@@ -476,8 +477,8 @@ var SnappyContext2D = function () {
                                 _posx(values[5], contextStatus), // dx
                                 _posy(values[6], contextStatus), // dy
                                 _size(values[7], contextStatus), // dWidth
-                                _size(values[8], contextStatus) // dHeight
-                                );
+                                _size(values[8], contextStatus // dHeight
+                                ));
                                 break;
                             default:
                                 throw new Error("SnappyContext2D: Wrong arguments for drawImage");
@@ -501,6 +502,11 @@ var SnappyContext2D = function () {
                         contextStatus = contextStatusStack.pop();
                         ctx.restore();
                     } }
+
+                // Hit regions
+                // TODO addHitRegion()        /!\ Experimental
+                // TODO removeHitRegion()     /!\ Experimental
+                // TODO clearHitRegion()      /!\ Experimental
 
             };
 
