@@ -311,6 +311,7 @@ You can find the documentation related to all those operation on MDN:
 
 ## Changelog
 
+* **0.5.1:** prevent line-width to be 0 (#16)
 * **0.5.0:**
   * Adds a new option to enable / disable the scale og the dashes width
   * Updates uglify-js to 3.0.0
