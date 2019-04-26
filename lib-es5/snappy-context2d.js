@@ -325,7 +325,13 @@ var SnappyContext2D = function () {
                         ctx.translate(tx, ty);
                         ctx.rotate(angle);
                     } },
-                // scale               -> not supported
+                scale: { fn: function fn(operation, operationName) {
+                        for (var _len8 = arguments.length, values = Array(_len8 > 2 ? _len8 - 2 : 0), _key8 = 2; _key8 < _len8; _key8++) {
+                            values[_key8 - 2] = arguments[_key8];
+                        }
+
+                        _contextOperationCall.apply(undefined, [ctx, operationName].concat(values));
+                    } },
                 translate: { fn: function fn(operation, operationName, tx, ty) {
                         contextStatus.tx += tx;
                         contextStatus.ty += ty;
