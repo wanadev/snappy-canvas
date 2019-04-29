@@ -119,7 +119,11 @@ var SnappyContext2D = function () {
             var contextStatus = {
                 tx: options.globalTranslationX,
                 ty: options.globalTranslationY,
-                scale: options.globalScale,
+                globalScale: options.globalScale,
+                scale: {
+                    x: options.globalScale,
+                    y: options.globalScale
+                },
                 lw: options.scaleLineWidth ? Math.max(1, options.globalScale | 0) : 1
             };
 
@@ -140,13 +144,19 @@ var SnappyContext2D = function () {
             // Filters
 
             var _posx = function _posx(x, cs) {
-                return ((x + cs.tx) * cs.scale | 0) + cs.lw * isStroke % 2 / 2;
+                return ((x + cs.tx) * cs.scale.x | 0) + cs.lw * isStroke % 2 / 2;
             };
             var _posy = function _posy(y, cs) {
-                return ((y + cs.ty) * cs.scale | 0) + cs.lw * isStroke % 2 / 2;
+                return ((y + cs.ty) * cs.scale.y | 0) + cs.lw * isStroke % 2 / 2;
             };
             var _size = function _size(s, cs) {
-                return s * cs.scale | 0;
+                return s * cs.globalScale | 0;
+            };
+            var _sizex = function _sizex(s, cs) {
+                return s * cs.scale.x | 0;
+            };
+            var _sizey = function _sizey(s, cs) {
+                return s * cs.scale.y | 0;
             };
             var _nop = function _nop(v, cs) {
                 return v;
@@ -200,14 +210,14 @@ var SnappyContext2D = function () {
             var operations = {
 
                 // Drawing rectangles
-                clearRect: { isStroke: 0, args: [_posx, _posy, _size, _size] },
-                fillRect: { isStroke: 0, args: [_posx, _posy, _size, _size] },
-                strokeRect: { isStroke: 1, args: [_posx, _posy, _size, _size] },
+                clearRect: { isStroke: 0, args: [_posx, _posy, _sizex, _sizey] },
+                fillRect: { isStroke: 0, args: [_posx, _posy, _sizex, _sizey] },
+                strokeRect: { isStroke: 1, args: [_posx, _posy, _sizex, _sizey] },
 
                 // Drawing text
                 fillText: { fn: function fn(operation, operationName) {
                         ctx.save();
-                        ctx.scale(contextStatus.scale, contextStatus.scale);
+                        ctx.scale(contextStatus.scale.x, contextStatus.scale.y);
                         ctx.translate(contextStatus.tx, contextStatus.ty);
 
                         for (var _len5 = arguments.length, values = Array(_len5 > 2 ? _len5 - 2 : 0), _key5 = 2; _key5 < _len5; _key5++) {
@@ -219,10 +229,10 @@ var SnappyContext2D = function () {
                     } },
                 strokeText: { fn: function fn(operation, operationName) {
                         ctx.save();
-                        ctx.scale(contextStatus.scale, contextStatus.scale);
+                        ctx.scale(contextStatus.scale.x, contextStatus.scale.y);
                         ctx.translate(contextStatus.tx, contextStatus.ty);
                         if (!options.scaleLineWidth) {
-                            ctx.lineWidth = contextStatus.lw / contextStatus.scale;
+                            ctx.lineWidth = contextStatus.lw / contextStatus.scale.global;
                         }
 
                         for (var _len6 = arguments.length, values = Array(_len6 > 2 ? _len6 - 2 : 0), _key6 = 2; _key6 < _len6; _key6++) {
@@ -238,7 +248,7 @@ var SnappyContext2D = function () {
                 lineWidth: { fn: function fn(operation, operationName) {
                         var lineWidth;
                         if (options.scaleLineWidth) {
-                            lineWidth = (arguments.length <= 2 ? undefined : arguments[2]) * contextStatus.scale | 0;
+                            lineWidth = (arguments.length <= 2 ? undefined : arguments[2]) * contextStatus.globalScale | 0;
                         } else {
                             lineWidth = (arguments.length <= 2 ? undefined : arguments[2]) | 0;
                         }
@@ -258,13 +268,13 @@ var SnappyContext2D = function () {
                         var tmp = values[0] ? values[0].slice(0) : [];
                         if (options.scaleDashesWidth) {
                             for (var i = 0; i < tmp.length; i++) {
-                                tmp[i] *= contextStatus.scale;
+                                tmp[i] *= contextStatus.globalScale;
                             }
                         }
                         ctx.setLineDash(tmp);
                     } },
                 lineDashOffset: { fn: function fn(operation, operationName) {
-                        ctx.lineDashOffset = (arguments.length <= 2 ? undefined : arguments[2]) * (contextStatus.scaleDashesWidth ? contextStatus.scale : 1) | 0;
+                        ctx.lineDashOffset = (arguments.length <= 2 ? undefined : arguments[2]) * (contextStatus.scaleDashesWidth ? contextStatus.globalScale : 1) | 0;
                     } },
 
                 // Text styles
@@ -299,8 +309,8 @@ var SnappyContext2D = function () {
                 quadraticCurveTo: { isPath: true, args: [_posx, _posy, _posx, _posy] },
                 arc: { isPath: true, args: [_posx, _posy, _size, _nop, _nop, _nop] },
                 arcTo: { isPath: true, args: [_posx, _posy, _posx, _posy, _size] },
-                ellipse: { isPath: true, args: [_posx, _posy, _size, _size, _nop, _nop, _nop, _nop] },
-                rect: { args: [_posx, _posy, _size, _size] },
+                ellipse: { isPath: true, args: [_posx, _posy, _sizex, _sizey, _nop, _nop, _nop, _nop] },
+                rect: { args: [_posx, _posy, _sizex, _sizey] },
 
                 // Drawing paths
                 fill: { fn: function fn(_) {
@@ -318,19 +328,22 @@ var SnappyContext2D = function () {
                 // Transformation
                 // currentTransform    -> not supported
                 rotate: { fn: function fn(operation, operationName, angle) {
-                        var tx = contextStatus.tx * contextStatus.scale | 0;
-                        var ty = contextStatus.ty * contextStatus.scale | 0;
+                        var tx = contextStatus.tx * contextStatus.globalScale | 0;
+                        var ty = contextStatus.ty * contextStatus.globalScale | 0;
                         contextStatus.tx = 0;
                         contextStatus.ty = 0;
                         ctx.translate(tx, ty);
                         ctx.rotate(angle);
                     } },
                 scale: { fn: function fn(operation, operationName) {
-                        for (var _len8 = arguments.length, values = Array(_len8 > 2 ? _len8 - 2 : 0), _key8 = 2; _key8 < _len8; _key8++) {
-                            values[_key8 - 2] = arguments[_key8];
-                        }
-
-                        _contextOperationCall.apply(undefined, [ctx, operationName].concat(values));
+                        var scaleX = (arguments.length <= 2 ? 0 : arguments.length - 2) > 0 ? arguments.length <= 2 ? undefined : arguments[2] : 1;
+                        var scaleY = (arguments.length <= 2 ? 0 : arguments.length - 2) > 1 ? arguments.length <= 3 ? undefined : arguments[3] : 1;
+                        contextStatus.scale = {
+                            defaultX: scaleX,
+                            defaultY: scaleY,
+                            x: scaleX * contextStatus.globalScale,
+                            y: scaleY * contextStatus.globalScale
+                        };
                     } },
                 translate: { fn: function fn(operation, operationName, tx, ty) {
                         contextStatus.tx += tx;
@@ -345,6 +358,9 @@ var SnappyContext2D = function () {
 
                 // Drawing images
                 drawImage: { fn: function fn(operation, operationName) {
+                        ctx.save();
+                        ctx.scale(contextStatus.scale.defaultX, contextStatus.scale.defaultY);
+
                         for (var _len8 = arguments.length, values = Array(_len8 > 2 ? _len8 - 2 : 0), _key8 = 2; _key8 < _len8; _key8++) {
                             values[_key8 - 2] = arguments[_key8];
                         }
@@ -354,16 +370,16 @@ var SnappyContext2D = function () {
                                 _contextOperationCall(ctx, operationName, values[0], // Image
                                 _posx(values[1], contextStatus), // dx
                                 _posy(values[2], contextStatus), // dy
-                                _size(values[0].width, contextStatus), // dWidth
-                                _size(values[0].height, contextStatus) // dHeight
+                                _sizex(values[0].width, contextStatus), // dWidth
+                                _sizey(values[0].height, contextStatus) // dHeight
                                 );
                                 break;
                             case 5:
                                 _contextOperationCall(ctx, operationName, values[0], // Image
                                 _posx(values[1], contextStatus), // dx
                                 _posy(values[2], contextStatus), // dy
-                                _size(values[3], contextStatus), // dWidth
-                                _size(values[4], contextStatus) // dHeight
+                                _sizex(values[3], contextStatus), // dWidth
+                                _sizey(values[4], contextStatus) // dHeight
                                 );
                                 break;
                             case 9:
@@ -374,13 +390,14 @@ var SnappyContext2D = function () {
                                 values[4], // sHeight
                                 _posx(values[5], contextStatus), // dx
                                 _posy(values[6], contextStatus), // dy
-                                _size(values[7], contextStatus), // dWidth
-                                _size(values[8], contextStatus) // dHeight
+                                _sizex(values[7], contextStatus), // dWidth
+                                _sizey(values[8], contextStatus) // dHeight
                                 );
                                 break;
                             default:
                                 throw new Error("SnappyContext2D: Wrong arguments for drawImage");
                         }
+                        ctx.restore();
                     } },
 
                 // Pixel manipulation
@@ -400,6 +417,11 @@ var SnappyContext2D = function () {
                         contextStatus = contextStatusStack.pop();
                         ctx.restore();
                     } }
+
+                // Hit regions
+                // TODO addHitRegion()        /!\ Experimental
+                // TODO removeHitRegion()     /!\ Experimental
+                // TODO clearHitRegion()      /!\ Experimental
 
             };
 
