@@ -153,6 +153,17 @@
             ctx.font = "18pt Arial";
             ctx.fillText("Hello World", 250, 120);
             ctx.strokeText("Hello World", 250, 180);
+            
+            ctx.save()
+            ctx.lineWidth = 1;
+            ctx.scale(2, 2);
+            ctx.strokeRect(5, 165, 50, 50);
+            ctx.restore()
+
+            ctx.save()
+            ctx.lineWidth = 1;
+            ctx.strokeRect(120, 330, 50, 50);
+            ctx.restore();
 
             ctx.render();
 
