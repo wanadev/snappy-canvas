@@ -385,8 +385,8 @@ var SnappyContext2D = function () {
                 ty: options.globalTranslationY,
                 scale: options.globalScale,
                 currentMatrix: new Matrix3D({
-                    a: options.globalScale, c: 0, e: options.globalTranslationX,
-                    b: 0, d: options.globalScale, f: options.globalTranslationY
+                    a: options.globalScale, c: 0, e: options.globalTranslationX * options.globalScale,
+                    b: 0, d: options.globalScale, f: options.globalTranslationY * options.globalScale
                 }),
                 lw: options.scaleLineWidth ? Math.max(1, options.globalScale | 0) : 1
             };
