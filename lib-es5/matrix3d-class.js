@@ -6,7 +6,7 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-module.exports.Matrix3D = function () {
+module.exports = function () {
     /**
      * @param  { Matrix3D || {a,b,c,d,e,f} || a,b,c,d,e,f } values 
      */
@@ -38,11 +38,6 @@ module.exports.Matrix3D = function () {
             });
         }
     }
-    /**
-     * 
-     * @private
-     */
-
 
     _createClass(Matrix3D, [{
         key: '_init',
@@ -54,15 +49,14 @@ module.exports.Matrix3D = function () {
             this.e = 0;
             this.f = 0;
         }
+    }, {
+        key: 'scale',
 
         /**
          * 
          * @param { number } scaleX 
          * @param { number } scaleY 
          */
-
-    }, {
-        key: 'scale',
         value: function scale(scaleX, scaleY) {
             var scaleMatrix = new Matrix3D({
                 a: scaleX,
@@ -103,25 +97,18 @@ module.exports.Matrix3D = function () {
             });
             this._multiply(rotateMatrix);
         }
-
-        /**
-         * 
-         * @param { Matrix3D } matrix
-         * @private
-         */
-
+    }, {
+        key: 'transformCoordinates',
+        value: function transformCoordinates(vector2) {
+            return {
+                x: this.a * vector2.x + this.b * vector2.y,
+                y: this.c * vector2.x + this.d * vector2.y
+            };
+        }
     }, {
         key: '_multiply',
         value: function _multiply(matrix) {
-            var matrixClone = this.clone();
-
-            this.a = matrixClone.a * matrix.a + matrixClone.c * matrix.b;
-            this.c = matrixClone.a * matrix.c + matrixClone.c * matrix.d;
-            this.e = matrixClone.a * matrix.e + matrixClone.c * matrix.f + matrixClone.e;
-
-            this.b = matrixClone.b * matrix.a + matrixClone.d * matrix.b;
-            this.d = matrixClone.b * matrix.c + matrixClone.d * matrix.d;
-            this.f = matrixClone.b * matrix.e + matrixClone.d * matrix.f + matrixClone.f;
+            return Matrix3D.multiply(this, matrix);
         }
 
         /**
@@ -146,6 +133,48 @@ module.exports.Matrix3D = function () {
             console.log('| ' + this.b + ' | ' + this.d + ' | ' + this.f + ' |');
             console.log('| 0 | 0 | 1 |');
             console.log('-------------');
+        }
+    }], [{
+        key: 'opposite',
+        value: function opposite(matrix) {
+            var matrixClone = matrix.clone();
+            var det = Matrix3D.determine(matrix);
+
+            matrix.a = matrixClone.d / det;
+            matrix.c = -matrixClone.c / det;
+            matrix.e = (matrixClone.c * matrixClone.f - matrixClone.d * matrixClone.e) / det;
+
+            matrix.b = -matrixClone.b / det;
+            matrix.d = matrixClone.a / det;
+            matrix.f = (-(matrixClone.a * matrixClone.f) + matrixClone.b * matrixClone.e) / det;
+
+            return matrix;
+        }
+
+        /**
+         * 
+         * @param { Matrix3D } matrix
+         */
+
+    }, {
+        key: 'multiply',
+        value: function multiply(matrixA, matrixB) {
+            var matrixClone = matrixA.clone();
+
+            matrixA.a = matrixClone.a * matrixB.a + matrixClone.c * matrixB.b;
+            matrixA.c = matrixClone.a * matrixB.c + matrixClone.c * matrixB.d;
+            matrixA.e = matrixClone.a * matrixB.e + matrixClone.c * matrixB.f + matrixClone.e;
+
+            matrixA.b = matrixClone.b * matrixB.a + matrixClone.d * matrixB.b;
+            matrixA.d = matrixClone.b * matrixB.c + matrixClone.d * matrixB.d;
+            matrixA.f = matrixClone.b * matrixB.e + matrixClone.d * matrixB.f + matrixClone.f;
+
+            return matrixA;
+        }
+    }, {
+        key: 'determine',
+        value: function determine(matrix) {
+            return matrix.a * matrix.d - matrix.b * matrix.c;
         }
     }]);
 

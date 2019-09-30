@@ -29,7 +29,7 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-module.exports.Matrix3D = function () {
+module.exports = function () {
     /**
      * @param  { Matrix3D || {a,b,c,d,e,f} || a,b,c,d,e,f } values 
      */
@@ -61,11 +61,6 @@ module.exports.Matrix3D = function () {
             });
         }
     }
-    /**
-     * 
-     * @private
-     */
-
 
     _createClass(Matrix3D, [{
         key: '_init',
@@ -77,15 +72,14 @@ module.exports.Matrix3D = function () {
             this.e = 0;
             this.f = 0;
         }
+    }, {
+        key: 'scale',
 
         /**
          * 
          * @param { number } scaleX 
          * @param { number } scaleY 
          */
-
-    }, {
-        key: 'scale',
         value: function scale(scaleX, scaleY) {
             var scaleMatrix = new Matrix3D({
                 a: scaleX,
@@ -126,25 +120,18 @@ module.exports.Matrix3D = function () {
             });
             this._multiply(rotateMatrix);
         }
-
-        /**
-         * 
-         * @param { Matrix3D } matrix
-         * @private
-         */
-
+    }, {
+        key: 'transformCoordinates',
+        value: function transformCoordinates(vector2) {
+            return {
+                x: this.a * vector2.x + this.b * vector2.y,
+                y: this.c * vector2.x + this.d * vector2.y
+            };
+        }
     }, {
         key: '_multiply',
         value: function _multiply(matrix) {
-            var matrixClone = this.clone();
-
-            this.a = matrixClone.a * matrix.a + matrixClone.c * matrix.b;
-            this.c = matrixClone.a * matrix.c + matrixClone.c * matrix.d;
-            this.e = matrixClone.a * matrix.e + matrixClone.c * matrix.f + matrixClone.e;
-
-            this.b = matrixClone.b * matrix.a + matrixClone.d * matrix.b;
-            this.d = matrixClone.b * matrix.c + matrixClone.d * matrix.d;
-            this.f = matrixClone.b * matrix.e + matrixClone.d * matrix.f + matrixClone.f;
+            return Matrix3D.multiply(this, matrix);
         }
 
         /**
@@ -169,6 +156,48 @@ module.exports.Matrix3D = function () {
             console.log('| ' + this.b + ' | ' + this.d + ' | ' + this.f + ' |');
             console.log('| 0 | 0 | 1 |');
             console.log('-------------');
+        }
+    }], [{
+        key: 'opposite',
+        value: function opposite(matrix) {
+            var matrixClone = matrix.clone();
+            var det = Matrix3D.determine(matrix);
+
+            matrix.a = matrixClone.d / det;
+            matrix.c = -matrixClone.c / det;
+            matrix.e = (matrixClone.c * matrixClone.f - matrixClone.d * matrixClone.e) / det;
+
+            matrix.b = -matrixClone.b / det;
+            matrix.d = matrixClone.a / det;
+            matrix.f = (-(matrixClone.a * matrixClone.f) + matrixClone.b * matrixClone.e) / det;
+
+            return matrix;
+        }
+
+        /**
+         * 
+         * @param { Matrix3D } matrix
+         */
+
+    }, {
+        key: 'multiply',
+        value: function multiply(matrixA, matrixB) {
+            var matrixClone = matrixA.clone();
+
+            matrixA.a = matrixClone.a * matrixB.a + matrixClone.c * matrixB.b;
+            matrixA.c = matrixClone.a * matrixB.c + matrixClone.c * matrixB.d;
+            matrixA.e = matrixClone.a * matrixB.e + matrixClone.c * matrixB.f + matrixClone.e;
+
+            matrixA.b = matrixClone.b * matrixB.a + matrixClone.d * matrixB.b;
+            matrixA.d = matrixClone.b * matrixB.c + matrixClone.d * matrixB.d;
+            matrixA.f = matrixClone.b * matrixB.e + matrixClone.d * matrixB.f + matrixClone.f;
+
+            return matrixA;
+        }
+    }, {
+        key: 'determine',
+        value: function determine(matrix) {
+            return matrix.a * matrix.d - matrix.b * matrix.c;
         }
     }]);
 
@@ -270,7 +299,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var helpers = require("./helpers.js");
-var Matrix3D = require("./matrix3d-class").Matrix3D;
+var Matrix3D = require("./matrix3d-class");
 
 var SnappyContext2D = function () {
     function SnappyContext2D(context2d) {
@@ -388,7 +417,7 @@ var SnappyContext2D = function () {
                     a: options.globalScale, c: 0, e: options.globalTranslationX * options.globalScale,
                     b: 0, d: options.globalScale, f: options.globalTranslationY * options.globalScale
                 }),
-                lw: options.scaleLineWidth ? Math.max(1, options.globalScale | 0) : 1
+                lw: options.scaleLineWidth ? 1 : 1 / options.globalScale
             };
 
             // Helpers
@@ -406,15 +435,31 @@ var SnappyContext2D = function () {
             }
 
             // Filters
-
-            var _posx = function _posx(x, cs) {
-                return x + cs.lw * isStroke % 2 / 2;
-            };
-            var _posy = function _posy(y, cs) {
-                return y + cs.lw * isStroke % 2 / 2;
-            };
             var _nop = function _nop(v, cs) {
                 return v;
+            };
+            var _posx = function _posx(x, cs) {
+                return x;
+            };
+            var _posy = function _posy(y, cs) {
+                return y;
+            };
+            var _adjust = function _adjust(x, y, contextStatus) {
+                var worldMatrix = contextStatus.currentMatrix.clone();
+                var oppositeWorldMatrix = Matrix3D.opposite(worldMatrix.clone());
+                var vector2 = {
+                    x: x + contextStatus.lw * isStroke % 2 / 2,
+                    y: y + contextStatus.lw * isStroke % 2 / 2
+                };
+                vector2 = worldMatrix.transformCoordinates(vector2);
+                return oppositeWorldMatrix.transformCoordinates({ x: Math.floor(vector2.x), y: Math.floor(vector2.y) });
+            };
+
+            var _size = function _size(s, cs) {
+                var size = s * cs.scale;
+                var roundedSize = Math.floor(size);
+                var diff = size - roundedSize;
+                return s - diff / cs.scale;
             };
 
             // Operations
@@ -431,7 +476,19 @@ var SnappyContext2D = function () {
                 if (!operation.isPath) {
                     var args = [];
                     for (var i = 0; i < values.length; i++) {
-                        args[i] = operation.args[i](values[i], contextStatus);
+                        if (operation.args[i].name == "_posx" && operation.args[i + 1].name == "_posy") {
+                            var vector2 = _adjust(values[i], values[i + 1], contextStatus);
+                            args[i] = vector2.x;
+                            args[i + 1] = vector2.y;
+                            i += 1;
+                        } else if (operation.args[i].name == "_size" && operation.args[i + 1].name == "_size") {
+                            var _vector = _adjust(values[i], values[i + 1], contextStatus);
+                            args[i] = _vector.x;
+                            args[i + 1] = _vector.y;
+                            i += 1;
+                        } else {
+                            args[i] = operation.args[i](values[i], contextStatus);
+                        }
                     }
                     _contextOperationCall.apply(undefined, [ctx, operationName].concat(args));
                 } else {
@@ -469,53 +526,26 @@ var SnappyContext2D = function () {
             var operations = {
 
                 // Drawing rectangles
-                clearRect: { isStroke: 0, args: [_posx, _posy, _nop, _nop] },
-                fillRect: { fn: function fn(operation, operationName) {
-                        ctx.save();
-                        if (!options.scaleLineWidth) {
-                            ctx.lineWidth = contextStatus.lw / contextStatus.scale;
-                        }
+                clearRect: { isStroke: 0, args: [_posx, _posy, _size, _size] },
+                fillRect: { isStroke: 0, args: [_posx, _posy, _size, _size] },
+                strokeRect: { isStroke: 1, args: [_posx, _posy, _size, _size] },
 
+                // Drawing text
+                fillText: { fn: function fn(operation, operationName) {
                         for (var _len5 = arguments.length, values = Array(_len5 > 2 ? _len5 - 2 : 0), _key5 = 2; _key5 < _len5; _key5++) {
                             values[_key5 - 2] = arguments[_key5];
                         }
 
                         ctx[operationName].apply(ctx, values);
-                        ctx.restore();
                     } },
-                strokeRect: { fn: function fn(operation, operationName) {
+                strokeText: { fn: function fn(operation, operationName) {
                         ctx.save();
-                        if (!options.scaleLineWidth) {
-                            ctx.lineWidth = contextStatus.lw / contextStatus.scale;
+                        if (options.scaleLineWidth) {
+                            ctx.lineWidth = contextStatus.lw * contextStatus.scale;
                         }
 
                         for (var _len6 = arguments.length, values = Array(_len6 > 2 ? _len6 - 2 : 0), _key6 = 2; _key6 < _len6; _key6++) {
                             values[_key6 - 2] = arguments[_key6];
-                        }
-
-                        ctx[operationName].apply(ctx, values);
-                        ctx.restore();
-                    } },
-
-                // Drawing text
-                fillText: { fn: function fn(operation, operationName) {
-                        ctx.save();
-
-                        for (var _len7 = arguments.length, values = Array(_len7 > 2 ? _len7 - 2 : 0), _key7 = 2; _key7 < _len7; _key7++) {
-                            values[_key7 - 2] = arguments[_key7];
-                        }
-
-                        ctx[operationName].apply(ctx, values);
-                        ctx.restore();
-                    } },
-                strokeText: { fn: function fn(operation, operationName) {
-                        ctx.save();
-                        if (!options.scaleLineWidth) {
-                            ctx.lineWidth = contextStatus.lw / contextStatus.scale;
-                        }
-
-                        for (var _len8 = arguments.length, values = Array(_len8 > 2 ? _len8 - 2 : 0), _key8 = 2; _key8 < _len8; _key8++) {
-                            values[_key8 - 2] = arguments[_key8];
                         }
 
                         ctx[operationName].apply(ctx, values);
@@ -527,11 +557,10 @@ var SnappyContext2D = function () {
                 lineWidth: { fn: function fn(operation, operationName) {
                         var lineWidth;
                         if (options.scaleLineWidth) {
-                            lineWidth = (arguments.length <= 2 ? undefined : arguments[2]) * contextStatus.scale | 0;
-                        } else {
                             lineWidth = (arguments.length <= 2 ? undefined : arguments[2]) | 0;
+                        } else {
+                            lineWidth = (arguments.length <= 2 ? undefined : arguments[2]) / contextStatus.scale;
                         }
-                        lineWidth = Math.max(1, lineWidth);
                         contextStatus.lw = lineWidth;
                         ctx.lineWidth = lineWidth;
                     } },
@@ -540,14 +569,14 @@ var SnappyContext2D = function () {
                 miterLimit: { args: [_nop] },
                 getLineDash: { args: [] },
                 setLineDash: { fn: function fn(operation, operationName) {
-                        for (var _len9 = arguments.length, values = Array(_len9 > 2 ? _len9 - 2 : 0), _key9 = 2; _key9 < _len9; _key9++) {
-                            values[_key9 - 2] = arguments[_key9];
+                        for (var _len7 = arguments.length, values = Array(_len7 > 2 ? _len7 - 2 : 0), _key7 = 2; _key7 < _len7; _key7++) {
+                            values[_key7 - 2] = arguments[_key7];
                         }
 
                         var tmp = values[0] ? values[0].slice(0) : [];
-                        if (options.scaleDashesWidth) {
+                        if (!options.scaleDashesWidth) {
                             for (var i = 0; i < tmp.length; i++) {
-                                tmp[i] *= contextStatus.scale;
+                                tmp[i] /= contextStatus.scale;
                             }
                         }
                         ctx.setLineDash(tmp);
@@ -586,10 +615,10 @@ var SnappyContext2D = function () {
                 lineTo: { isPath: true, args: [_posx, _posy] },
                 bezierCurveTo: { isPath: true, args: [_posx, _posy, _posx, _posy, _posx, _posy] },
                 quadraticCurveTo: { isPath: true, args: [_posx, _posy, _posx, _posy] },
-                arc: { isPath: true, args: [_posx, _posy, _nop, _nop, _nop, _nop] },
-                arcTo: { isPath: true, args: [_posx, _posy, _posx, _posy, _nop] },
-                ellipse: { isPath: true, args: [_posx, _posy, _nop, _nop, _nop, _nop, _nop, _nop] },
-                rect: { args: [_posx, _posy, _nop, _nop] },
+                arc: { isPath: true, args: [_posx, _posy, _size, _nop, _nop, _nop] },
+                arcTo: { isPath: true, args: [_posx, _posy, _posx, _posy, _size] },
+                ellipse: { isPath: true, args: [_posx, _posy, _size, _size, _nop, _nop, _nop, _nop] },
+                rect: { args: [_posx, _posy, _size, _size] },
 
                 // Drawing paths
                 fill: { fn: function fn(_) {
@@ -628,8 +657,8 @@ var SnappyContext2D = function () {
 
                 // Drawing images
                 drawImage: { fn: function fn(operation, operationName) {
-                        for (var _len10 = arguments.length, values = Array(_len10 > 2 ? _len10 - 2 : 0), _key10 = 2; _key10 < _len10; _key10++) {
-                            values[_key10 - 2] = arguments[_key10];
+                        for (var _len8 = arguments.length, values = Array(_len8 > 2 ? _len8 - 2 : 0), _key8 = 2; _key8 < _len8; _key8++) {
+                            values[_key8 - 2] = arguments[_key8];
                         }
 
                         switch (values.length) {
@@ -637,16 +666,16 @@ var SnappyContext2D = function () {
                                 _contextOperationCall(ctx, operationName, values[0], // Image
                                 _posx(values[1], contextStatus), // dx
                                 _posy(values[2], contextStatus), // dy
-                                _nop(values[0].width, contextStatus), // dWidth
-                                _nop(values[0].height, contextStatus) // dHeight
+                                _size(values[0].width, contextStatus), // dWidth
+                                _size(values[0].height, contextStatus) // dHeight
                                 );
                                 break;
                             case 5:
                                 _contextOperationCall(ctx, operationName, values[0], // Image
                                 _posx(values[1], contextStatus), // dx
                                 _posy(values[2], contextStatus), // dy
-                                _nop(values[3], contextStatus), // dWidth
-                                _nop(values[4], contextStatus) // dHeight
+                                _size(values[3], contextStatus), // dWidth
+                                _size(values[4], contextStatus) // dHeight
                                 );
                                 break;
                             case 9:
@@ -657,8 +686,8 @@ var SnappyContext2D = function () {
                                 values[4], // sHeight
                                 _posx(values[5], contextStatus), // dx
                                 _posy(values[6], contextStatus), // dy
-                                _nop(values[7], contextStatus), // dWidth
-                                _nop(values[8], contextStatus) // dHeight
+                                _size(values[7], contextStatus), // dWidth
+                                _size(values[8], contextStatus) // dHeight
                                 );
                                 break;
                             default:
