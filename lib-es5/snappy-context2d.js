@@ -7,6 +7,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var helpers = require("./helpers.js");
+var Matrix3D = require("./matrix3d-class");
 
 var SnappyContext2D = function () {
     function SnappyContext2D(context2d) {
@@ -120,7 +121,11 @@ var SnappyContext2D = function () {
                 tx: options.globalTranslationX,
                 ty: options.globalTranslationY,
                 scale: options.globalScale,
-                lw: options.scaleLineWidth ? Math.max(1, options.globalScale | 0) : 1
+                currentMatrix: new Matrix3D({
+                    a: options.globalScale, c: 0, e: options.globalTranslationX * options.globalScale,
+                    b: 0, d: options.globalScale, f: options.globalTranslationY * options.globalScale
+                }),
+                lw: options.scaleLineWidth ? 1 : 1 / options.globalScale
             };
 
             // Helpers
@@ -138,18 +143,31 @@ var SnappyContext2D = function () {
             }
 
             // Filters
-
-            var _posx = function _posx(x, cs) {
-                return ((x + cs.tx) * cs.scale | 0) + cs.lw * isStroke % 2 / 2;
-            };
-            var _posy = function _posy(y, cs) {
-                return ((y + cs.ty) * cs.scale | 0) + cs.lw * isStroke % 2 / 2;
-            };
-            var _size = function _size(s, cs) {
-                return s * cs.scale | 0;
-            };
             var _nop = function _nop(v, cs) {
                 return v;
+            };
+            var _posx = function _posx(x, cs) {
+                return x;
+            };
+            var _posy = function _posy(y, cs) {
+                return y;
+            };
+            var _adjust = function _adjust(x, y, contextStatus) {
+                var worldMatrix = contextStatus.currentMatrix.clone();
+                var oppositeWorldMatrix = Matrix3D.opposite(worldMatrix.clone());
+                var vector2 = {
+                    x: x + contextStatus.lw * isStroke % 2 / 2,
+                    y: y + contextStatus.lw * isStroke % 2 / 2
+                };
+                vector2 = worldMatrix.transformCoordinates(vector2);
+                return oppositeWorldMatrix.transformCoordinates({ x: Math.floor(vector2.x), y: Math.floor(vector2.y) });
+            };
+
+            var _size = function _size(s, cs) {
+                var size = s * cs.scale;
+                var roundedSize = Math.floor(size);
+                var diff = size - roundedSize;
+                return s - diff / cs.scale;
             };
 
             // Operations
@@ -166,7 +184,19 @@ var SnappyContext2D = function () {
                 if (!operation.isPath) {
                     var args = [];
                     for (var i = 0; i < values.length; i++) {
-                        args[i] = operation.args[i](values[i], contextStatus);
+                        if (operation.args[i].name == "_posx" && operation.args[i + 1].name == "_posy") {
+                            var vector2 = _adjust(values[i], values[i + 1], contextStatus);
+                            args[i] = vector2.x;
+                            args[i + 1] = vector2.y;
+                            i += 1;
+                        } else if (operation.args[i].name == "_size" && operation.args[i + 1].name == "_size") {
+                            var _vector = _adjust(values[i], values[i + 1], contextStatus);
+                            args[i] = _vector.x;
+                            args[i + 1] = _vector.y;
+                            i += 1;
+                        } else {
+                            args[i] = operation.args[i](values[i], contextStatus);
+                        }
                     }
                     _contextOperationCall.apply(undefined, [ctx, operationName].concat(args));
                 } else {
@@ -197,6 +227,10 @@ var SnappyContext2D = function () {
                 throw new Error("SnappyContext2D: operation not supported: " + operationName + ".");
             }
 
+            var _applyMatrix = function _applyMatrix(matrix) {
+                ctx.setTransform(matrix.a, matrix.b, matrix.c, matrix.d, matrix.e, matrix.f);
+            };
+
             var operations = {
 
                 // Drawing rectangles
@@ -206,23 +240,16 @@ var SnappyContext2D = function () {
 
                 // Drawing text
                 fillText: { fn: function fn(operation, operationName) {
-                        ctx.save();
-                        ctx.scale(contextStatus.scale, contextStatus.scale);
-                        ctx.translate(contextStatus.tx, contextStatus.ty);
-
                         for (var _len5 = arguments.length, values = Array(_len5 > 2 ? _len5 - 2 : 0), _key5 = 2; _key5 < _len5; _key5++) {
                             values[_key5 - 2] = arguments[_key5];
                         }
 
                         ctx[operationName].apply(ctx, values);
-                        ctx.restore();
                     } },
                 strokeText: { fn: function fn(operation, operationName) {
                         ctx.save();
-                        ctx.scale(contextStatus.scale, contextStatus.scale);
-                        ctx.translate(contextStatus.tx, contextStatus.ty);
-                        if (!options.scaleLineWidth) {
-                            ctx.lineWidth = contextStatus.lw / contextStatus.scale;
+                        if (options.scaleLineWidth) {
+                            ctx.lineWidth = contextStatus.lw * contextStatus.scale;
                         }
 
                         for (var _len6 = arguments.length, values = Array(_len6 > 2 ? _len6 - 2 : 0), _key6 = 2; _key6 < _len6; _key6++) {
@@ -238,11 +265,10 @@ var SnappyContext2D = function () {
                 lineWidth: { fn: function fn(operation, operationName) {
                         var lineWidth;
                         if (options.scaleLineWidth) {
-                            lineWidth = (arguments.length <= 2 ? undefined : arguments[2]) * contextStatus.scale | 0;
-                        } else {
                             lineWidth = (arguments.length <= 2 ? undefined : arguments[2]) | 0;
+                        } else {
+                            lineWidth = (arguments.length <= 2 ? undefined : arguments[2]) / contextStatus.scale;
                         }
-                        lineWidth = Math.max(1, lineWidth);
                         contextStatus.lw = lineWidth;
                         ctx.lineWidth = lineWidth;
                     } },
@@ -256,9 +282,9 @@ var SnappyContext2D = function () {
                         }
 
                         var tmp = values[0] ? values[0].slice(0) : [];
-                        if (options.scaleDashesWidth) {
+                        if (!options.scaleDashesWidth) {
                             for (var i = 0; i < tmp.length; i++) {
-                                tmp[i] *= contextStatus.scale;
+                                tmp[i] /= contextStatus.scale;
                             }
                         }
                         ctx.setLineDash(tmp);
@@ -318,17 +344,17 @@ var SnappyContext2D = function () {
                 // Transformation
                 // currentTransform    -> not supported
                 rotate: { fn: function fn(operation, operationName, angle) {
-                        var tx = contextStatus.tx * contextStatus.scale | 0;
-                        var ty = contextStatus.ty * contextStatus.scale | 0;
-                        contextStatus.tx = 0;
-                        contextStatus.ty = 0;
-                        ctx.translate(tx, ty);
-                        ctx.rotate(angle);
+                        contextStatus.currentMatrix.rotate(angle);
+                        _applyMatrix(contextStatus.currentMatrix);
+                    } },
+                scale: { fn: function fn(operation, operationName, sx, sy) {
+                        contextStatus.currentMatrix.scale(sx, sy);
+                        _applyMatrix(contextStatus.currentMatrix);
                     } },
                 // scale               -> not supported
                 translate: { fn: function fn(operation, operationName, tx, ty) {
-                        contextStatus.tx += tx;
-                        contextStatus.ty += ty;
+                        contextStatus.currentMatrix.translate(tx, ty, contextStatus.scale);
+                        _applyMatrix(contextStatus.currentMatrix);
                     } },
                 // transform()         -> not supported
                 // resetTransform()    -> not supported
@@ -392,8 +418,14 @@ var SnappyContext2D = function () {
                     } },
                 restore: { fn: function fn(operation, operationName) {
                         contextStatus = contextStatusStack.pop();
+                        contextStatus.currentMatrix = new Matrix3D(contextStatus.currentMatrix);
                         ctx.restore();
                     } }
+
+                // Hit regions
+                // TODO addHitRegion()        /!\ Experimental
+                // TODO removeHitRegion()     /!\ Experimental
+                // TODO clearHitRegion()      /!\ Experimental
 
             };
 
@@ -422,6 +454,7 @@ var SnappyContext2D = function () {
             ctx.save();
             ctx.lineWidth = contextStatus.lw;
             ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+            _applyMatrix(contextStatus.currentMatrix);
             _drawStack(this._drawing);
             ctx.restore();
         }

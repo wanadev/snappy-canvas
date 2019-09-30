@@ -154,6 +154,12 @@
             ctx.fillText("Hello World", 250, 120);
             ctx.strokeText("Hello World", 250, 180);
 
+            ctx.save()
+            ctx.lineWidth = 2;
+            ctx.scale(2, 2);
+            ctx.strokeRect( 8, 165, 50, 50);
+            ctx.restore()
+
             ctx.render();
 
             // Additional code for live translation & scaling
